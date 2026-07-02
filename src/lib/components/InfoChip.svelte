@@ -48,9 +48,9 @@
 			{@render icon()}
 		</div>
 	{/if}
-	<div class="max truncate">
-		<div class="row-label font-body">{label}</div>
-		<div class="row-value font-display">{value}</div>
+	<div class="max column align-start no-space">
+		<div class="row-label font-body truncate">{label}</div>
+		<div class="row-value font-display truncate">{value}</div>
 	</div>
 </div>
 

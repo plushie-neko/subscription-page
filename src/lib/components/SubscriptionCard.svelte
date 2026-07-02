@@ -56,9 +56,9 @@
 			<i>{isActive ? 'check' : 'close'}</i>
 		</div>
 		
-		<div class="max truncate user-details-box">
-			<h4 class="username font-display no-margin">{user.username || user.shortUuid || 'User'}</h4>
-			<p class="expiry-label font-body no-margin" class:expired={user.userStatus === 'EXPIRED' || user.daysLeft <= 0}>
+		<div class="max column align-start no-space user-details-box">
+			<h4 class="username font-display no-margin truncate">{user.username || user.shortUuid || 'User'}</h4>
+			<p class="expiry-label font-body no-margin truncate" class:expired={user.userStatus === 'EXPIRED' || user.daysLeft <= 0}>
 				{expirationText}
 			</p>
 		</div>
