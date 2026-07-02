@@ -147,10 +147,15 @@ export async function getSubscriptionInfo(clientIp: string, shortUuid: string): 
 
 	try {
 		const client = getAxiosClient(clientIp);
-		const response = await client.get(`/api/sub/${encodeURIComponent(shortUuid)}/info`);
+		// Correct endpoint: GET /api/sub/{shortUuid}/info
+		const response = await client.get(`/api/sub/${encodeURIComponent(shortUuid)}/info`, {
+			headers: {
+				'x-remnawave-real-ip': clientIp
+			}
+		});
 		return response.data;
-	} catch (e) {
-		console.error('Error fetching subscription info:', e);
+	} catch (e: any) {
+		console.error('Error fetching subscription info:', e?.message || e);
 		return null;
 	}
 }
@@ -169,7 +174,8 @@ export async function getSubpageConfigByUuid(uuid: string): Promise<SubpageConfi
 
 	try {
 		const client = getAxiosClient();
-		const response = await client.get(`/api/subscription-page/config/${encodeURIComponent(uuid)}`);
+		// Correct endpoint: /api/subscription-page-configs/{uuid}
+		const response = await client.get(`/api/subscription-page-configs/${encodeURIComponent(uuid)}`);
 		const subpageConfig = response.data?.response?.config || null;
 		
 		if (subpageConfig) {
@@ -199,9 +205,7 @@ export async function getSubpageConfigByShortUuid(
 	}
 
 	try {
-		const client = getAxiosClient(clientIp, requestHeaders);
-		
-		// Map headers to Record
+		// Map client request headers to a plain Record for the request body
 		const reqHeadersRecord: Record<string, string> = {};
 		if (requestHeaders) {
 			requestHeaders.forEach((value, key) => {
@@ -209,32 +213,20 @@ export async function getSubpageConfigByShortUuid(
 			});
 		}
 
-		let response;
-		try {
-			// Perform POST request with body containing client headers
-			response = await client.post(`/api/subscriptions/subpage-config/${encodeURIComponent(shortUuid)}`, {
+		const client = getAxiosClient(clientIp, requestHeaders);
+
+		// The backend-contract defines this as GET /api/subscriptions/subpage-config/{shortUuid}
+		// with requestHeaders in the body (Remnawave uses GET with body)
+		const response = await client.request({
+			method: 'GET',
+			url: `/api/subscriptions/subpage-config/${encodeURIComponent(shortUuid)}`,
+			data: {
 				requestHeaders: reqHeadersRecord
-			});
-		} catch (e: any) {
-			console.warn(`POST /api/subscriptions/subpage-config/${shortUuid} failed with status: ${e?.response?.status}. Falling back to GET with body.`);
-			
-			try {
-				// If POST is not supported or fails, fallback to GET (some setups vary)
-				response = await client.request({
-					method: 'GET',
-					url: `/api/subscriptions/subpage-config/${encodeURIComponent(shortUuid)}`,
-					data: {
-						requestHeaders: reqHeadersRecord
-					},
-					headers: {
-						'Content-Type': 'application/json'
-					}
-				});
-			} catch (fallbackError: any) {
-				console.error('GET fallback failed as well. Error:', fallbackError?.response?.data || fallbackError?.message || fallbackError);
-				throw fallbackError; // throw to be caught by outer block
+			},
+			headers: {
+				'Content-Type': 'application/json'
 			}
-		}
+		});
 
 		const result = response.data?.response;
 		if (!result) {
@@ -275,16 +267,28 @@ export async function getSubscription(
 	}
 
 	try {
-		let path = `/api/sub/${encodeURIComponent(shortUuid)}`;
+		let path = `api/sub/${encodeURIComponent(shortUuid)}`;
 		if (clientType) {
 			path += `/${encodeURIComponent(clientType)}`;
 		}
+
+		// Filter client headers, removing connection-specific ones
+		const safeHeaders = filterHeaders(headers);
 
 		const client = getAxiosClient(clientIp, headers);
 		const response = await client.get(path, {
 			responseType: 'text',
 			// Don't throw errors for status codes >= 400 (let us proxy them natively)
-			validateStatus: () => true
+			validateStatus: () => true,
+			headers: {
+				...safeHeaders,
+				Accept: '*/*',
+				'Cache-Control': 'no-cache, no-store, must-revalidate, private, max-age=0',
+				Pragma: 'no-cache',
+				Expires: '0',
+				'x-remnawave-real-ip': clientIp,
+				Authorization: undefined as unknown as string // Let getAxiosClient handle this
+			}
 		});
 
 		if (response.status === 404) {
@@ -299,9 +303,16 @@ export async function getSubscription(
 			}
 		});
 
+		// Ensure we return a valid status code for the Response constructor
+		// HTTP 304 is not a valid status for Response with body, convert to 200
+		let finalStatus = response.status;
+		if (finalStatus === 304) {
+			finalStatus = 200;
+		}
+
 		return {
 			body: response.data,
-			status: response.status,
+			status: finalStatus,
 			headers: responseHeaders
 		};
 	} catch (e) {
