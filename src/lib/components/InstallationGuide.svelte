@@ -106,7 +106,68 @@
         break;
     }
   }
+
+  const layoutType = $derived($config?.uiConfig?.installationGuidesBlockType ?? 'accordion');
+  let activeAccordionIndex = $state<number | null>(0);
+
+  $effect(() => {
+    if (selectedPlatformKey || selectedAppIndex >= 0) {
+      activeAccordionIndex = 0;
+    }
+  });
+
+  function getColorVar(colorName: string): string {
+    const colors: Record<string, string> = {
+      mint: 'var(--accent-mint)',
+      pink: 'var(--accent-pink)',
+      lavender: 'var(--accent-lavender)',
+      peach: 'var(--accent-peach)',
+      cyan: 'var(--accent-cyan)',
+      yellow: 'var(--accent-yellow)',
+      red: 'var(--accent-red)',
+      green: 'var(--accent-green)'
+    };
+    return colors[colorName] ?? 'var(--accent-lavender)';
+  }
 </script>
+
+{#snippet stepIcon(block: PlatformAppBlock)}
+  {#if $config?.svgLibrary && $config.svgLibrary[block.svgIconKey]}
+    <span class="block-icon">{@html $config.svgLibrary[block.svgIconKey]}</span>
+  {:else}
+    <span class="quest-marker">◆</span>
+  {/if}
+{/snippet}
+
+{#snippet stepDetails(block: PlatformAppBlock, blockIdx: number)}
+  {#if block.description}
+    <p class="block-desc">{@html t(block.description)}</p>
+  {/if}
+
+  {#if block.buttons && block.buttons.length > 0}
+    <div class="block-buttons">
+      {#each block.buttons as btn, btnIdx}
+        {@const btnId = `${blockIdx}-${btnIdx}`}
+        <button
+          class="pixel-btn"
+          class:primary={btn.type === 'external' || btn.type === 'subscriptionLink'}
+          class:pink={btn.type === 'copyButton'}
+          onclick={() => handleButton(btn, btnId)}
+        >
+          {#if copied === btnId}
+            <iconify-icon icon="pixelarticons:check" style="margin-right: 4px; vertical-align: middle;"></iconify-icon>
+            {#if $config?.baseTranslations}{t({ en: 'Copied', ru: 'Скопировано' })}{:else}Copied!{/if}
+          {:else}
+            {#if $config?.svgLibrary && $config.svgLibrary[btn.svgIconKey]}
+              <span class="btn-svg">{@html $config.svgLibrary[btn.svgIconKey]}</span>
+            {/if}
+            {t(btn.text)}
+          {/if}
+        </button>
+      {/each}
+    </div>
+  {/if}
+{/snippet}
 
 {#if $availablePlatforms.length > 0}
   <section class="install-guide" style="animation: slide-up 0.3s ease both; animation-delay: 0.2s;">
@@ -114,8 +175,7 @@
       {#if $config?.baseTranslations}{t('installationGuideHeader')}{:else}Quest Log — Setup Guide{/if}
     </h2>
 
-    <div class="pixel-card">
-      <!-- Platform tabs -->
+    <div class="pixel-card guide-main-card">
       <div class="platform-tabs">
         {#each sortedPlatforms as plat}
           <button
@@ -133,7 +193,6 @@
         {/each}
       </div>
 
-      <!-- App selector (if multiple apps) -->
       {#if apps.length > 1}
         <div class="app-grid">
           {#each apps as app, i}
@@ -152,48 +211,78 @@
         </div>
       {/if}
 
-      <!-- Blocks / Steps -->
       {#if selectedApp}
-        <div class="blocks">
-          {#each selectedApp.blocks as block, blockIdx}
-            <div class="block-item">
-              <h3 class="block-title">
-                {#if $config?.svgLibrary && $config.svgLibrary[block.svgIconKey]}
-                  <span class="block-icon">{@html $config.svgLibrary[block.svgIconKey]}</span>
-                {:else}
-                  <span class="quest-marker">◆</span>
-                {/if}
-                {t(block.title)}
-              </h3>
-
-              {#if block.description}
-                <p class="block-desc">{@html t(block.description)}</p>
-              {/if}
-
-              {#if block.buttons && block.buttons.length > 0}
-                <div class="block-buttons">
-                  {#each block.buttons as btn, btnIdx}
-                    {@const btnId = `${blockIdx}-${btnIdx}`}
-                    <button
-                      class="pixel-btn"
-                      class:primary={btn.type === 'external' || btn.type === 'subscriptionLink'}
-                      class:pink={btn.type === 'copyButton'}
-                      onclick={() => handleButton(btn, btnId)}
-                    >
-                      {#if copied === btnId}
-                        <iconify-icon icon="pixelarticons:check" style="margin-right: 4px; vertical-align: middle;"></iconify-icon> {#if $config?.baseTranslations}{t({ en: 'Copied', ru: 'Скопировано' })}{:else}Copied!{/if}
-                      {:else}
-                        {#if $config?.svgLibrary && $config.svgLibrary[btn.svgIconKey]}
-                          <span class="btn-svg">{@html $config.svgLibrary[btn.svgIconKey]}</span>
-                        {/if}
-                        {t(btn.text)}
-                      {/if}
-                    </button>
-                  {/each}
+        <div class="blocks-container" class:cards-layout={layoutType === 'cards'} class:timeline-layout={layoutType === 'timeline'} class:accordion-layout={layoutType === 'accordion'} class:minimal-layout={layoutType === 'minimal'}>
+          
+          {#if layoutType === 'cards'}
+            {#each selectedApp.blocks as block, blockIdx}
+              <div class="block-card-item" style="--step-accent-color: {getColorVar(block.svgIconColor)}">
+                <div class="block-card-header">
+                  <div class="block-card-icon-circle">
+                    {@render stepIcon(block)}
+                  </div>
+                  <h3 class="block-title">{t(block.title)}</h3>
                 </div>
-              {/if}
-            </div>
-          {/each}
+                <div class="block-card-body">
+                  {@render stepDetails(block, blockIdx)}
+                </div>
+              </div>
+            {/each}
+
+          {:else if layoutType === 'timeline'}
+            {#each selectedApp.blocks as block, blockIdx}
+              <div class="timeline-item" style="--step-accent-color: {getColorVar(block.svgIconColor)}">
+                <div class="timeline-bullet-node">
+                  {@render stepIcon(block)}
+                </div>
+                <div class="timeline-content">
+                  <h3 class="block-title">{t(block.title)}</h3>
+                  {@render stepDetails(block, blockIdx)}
+                </div>
+              </div>
+            {/each}
+
+          {:else if layoutType === 'accordion'}
+            {#each selectedApp.blocks as block, blockIdx}
+              {@const isOpen = activeAccordionIndex === blockIdx}
+              <div class="accordion-item" class:open={isOpen} style="--step-accent-color: {getColorVar(block.svgIconColor)}">
+                <button 
+                  class="accordion-header-btn" 
+                  onclick={() => activeAccordionIndex = isOpen ? null : blockIdx}
+                  aria-expanded={isOpen}
+                >
+                  <div class="header-left">
+                    <div class="accordion-icon-circle">
+                      {@render stepIcon(block)}
+                    </div>
+                    <span class="accordion-title">{t(block.title)}</span>
+                  </div>
+                  <iconify-icon icon="pixelarticons:chevron-down" class="chevron" class:expanded={isOpen}></iconify-icon>
+                </button>
+                {#if isOpen}
+                  <div class="accordion-content-panel" style="animation: slide-up 0.2s ease both;">
+                    {@render stepDetails(block, blockIdx)}
+                  </div>
+                {/if}
+              </div>
+            {/each}
+
+          {:else if layoutType === 'minimal'}
+            {#each selectedApp.blocks as block, blockIdx}
+              <div class="minimal-step-item" style="--step-accent-color: {getColorVar(block.svgIconColor)}">
+                <div class="minimal-header">
+                  <div class="minimal-icon-circle">
+                    {@render stepIcon(block)}
+                  </div>
+                  <h3 class="minimal-title">{t(block.title)}</h3>
+                </div>
+                <div class="minimal-content">
+                  {@render stepDetails(block, blockIdx)}
+                </div>
+              </div>
+            {/each}
+          {/if}
+
         </div>
       {/if}
     </div>
@@ -201,6 +290,10 @@
 {/if}
 
 <style>
+  .guide-main-card {
+    padding: 16px !important;
+  }
+
   .platform-tabs {
     display: flex;
     flex-wrap: wrap;
@@ -285,29 +378,17 @@
     white-space: nowrap;
   }
 
-  /* Blocks */
-  .blocks {
+  .blocks-container {
     display: flex;
     flex-direction: column;
-    gap: 20px;
-  }
-
-  .block-item {
-    padding: 16px;
-    background: rgba(255,255,255,0.01);
-    border: 1px solid rgba(255,255,255,0.04);
-    border-left: 3px solid var(--accent-lavender);
-    position: relative;
+    gap: 16px;
   }
 
   .block-title {
     font-family: var(--font-pixel);
     font-size: 10px;
-    color: var(--accent-lavender);
-    margin-bottom: 10px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
+    color: var(--text-primary);
+    margin: 0;
   }
 
   .block-icon {
@@ -317,7 +398,6 @@
     width: 16px;
     height: 16px;
     fill: currentColor;
-    color: var(--accent-pink);
   }
 
   .block-icon :global(svg) {
@@ -326,7 +406,7 @@
   }
 
   .quest-marker {
-    color: var(--accent-pink);
+    color: var(--text-muted);
     font-size: 12px;
   }
 
@@ -337,7 +417,6 @@
     line-height: 1.5;
   }
 
-  /* Buttons */
   .block-buttons {
     display: flex;
     flex-wrap: wrap;
@@ -358,5 +437,209 @@
   .btn-svg :global(svg) {
     width: 100%;
     height: 100%;
+  }
+
+  .cards-layout .block-card-item {
+    padding: 16px;
+    background: var(--bg-elevated);
+    border: 2px solid rgba(255, 255, 255, 0.05);
+    border-left: 4px solid var(--step-accent-color);
+    box-shadow: 0 2px 0 var(--shadow-color);
+    border-radius: 4px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .block-card-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .block-card-icon-circle {
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(255, 255, 255, 0.02);
+    color: var(--step-accent-color);
+    font-size: 12px;
+    flex-shrink: 0;
+  }
+
+  .timeline-layout {
+    position: relative;
+    padding-left: 36px;
+    gap: 24px;
+  }
+
+  .timeline-layout::before {
+    content: '';
+    position: absolute;
+    top: 8px;
+    left: 15px;
+    bottom: 8px;
+    width: 2px;
+    background: rgba(255, 255, 255, 0.08);
+  }
+
+  .timeline-item {
+    position: relative;
+  }
+
+  .timeline-bullet-node {
+    position: absolute;
+    left: -36px;
+    top: 0;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg-card);
+    border: 2px solid var(--step-accent-color);
+    color: var(--step-accent-color);
+    border-radius: 4px;
+    z-index: 1;
+    box-shadow: 0 2px 0 var(--shadow-color);
+  }
+
+  .timeline-content {
+    padding-left: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .accordion-layout {
+    gap: 8px;
+  }
+
+  .accordion-item {
+    background: var(--bg-card);
+    border: 2px solid rgba(255, 255, 255, 0.05);
+    border-radius: 4px;
+    overflow: hidden;
+    transition: border-color 0.2s ease;
+  }
+
+  .accordion-item.open {
+    border-color: var(--step-accent-color);
+  }
+
+  .accordion-header-btn {
+    width: 100%;
+    background: var(--bg-elevated);
+    border: none;
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    cursor: pointer;
+    text-align: left;
+    outline: none;
+  }
+
+  :global([dir="rtl"]) .accordion-header-btn {
+    text-align: right;
+  }
+
+  .accordion-title {
+    font-family: var(--font-pixel);
+    font-size: 10px;
+    color: var(--text-primary);
+  }
+
+  .accordion-icon-circle {
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(255, 255, 255, 0.02);
+    color: var(--step-accent-color);
+    font-size: 12px;
+    flex-shrink: 0;
+  }
+
+  .accordion-content-panel {
+    padding: 16px;
+    background: rgba(255, 255, 255, 0.01);
+    border-top: 2px dashed rgba(255, 255, 255, 0.05);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .chevron {
+    font-size: 14px;
+    color: var(--text-muted);
+    transition: transform 0.2s ease;
+  }
+
+  .chevron.expanded {
+    transform: rotate(180deg);
+  }
+
+  .minimal-layout {
+    gap: 0;
+  }
+
+  .minimal-step-item {
+    padding: 16px 0;
+    border-bottom: 2px dashed rgba(255, 255, 255, 0.05);
+  }
+
+  .minimal-step-item:last-child {
+    border-bottom: none;
+  }
+
+  .minimal-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 8px;
+  }
+
+  .minimal-icon-circle {
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--step-accent-color);
+    font-size: 12px;
+    flex-shrink: 0;
+  }
+
+  .minimal-title {
+    font-family: var(--font-pixel);
+    font-size: 10px;
+    color: var(--text-primary);
+  }
+
+  .minimal-content {
+    padding-left: 30px;
+  }
+
+  :global([dir="rtl"]) .minimal-content {
+    padding-left: 0;
+    padding-right: 30px;
+  }
+
+  :global([dir="rtl"]) .app-name,
+  :global([dir="rtl"]) .block-title,
+  :global([dir="rtl"]) .accordion-title,
+  :global([dir="rtl"]) .minimal-title {
+    font-size: 14px !important;
+  }
+  :global([dir="rtl"]) .block-desc {
+    font-size: 13.5px !important;
   }
 </style>
