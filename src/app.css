@@ -91,14 +91,17 @@
   --btn-primary-bg-1: #2a6d5a;
   --btn-primary-bg-2: #1a4d3e;
   --btn-primary-border: #0d2920;
+  --btn-primary-text: var(--accent-mint);
 
   --btn-danger-bg-1: #6d2a2a;
   --btn-danger-bg-2: #4d1a1a;
   --btn-danger-border: #200d0d;
+  --btn-danger-text: var(--accent-red);
 
   --btn-pink-bg-1: #5a2a4d;
   --btn-pink-bg-2: #3d1a35;
   --btn-pink-border: #1a0d16;
+  --btn-pink-text: var(--accent-pink);
 }
 
 /* RTL / Farsi Typography Overrides */
@@ -145,14 +148,17 @@
   --btn-primary-bg-1: #69db7c;
   --btn-primary-bg-2: #2b8a3e;
   --btn-primary-border: #1a5c28;
+  --btn-primary-text: #ffffff;
 
   --btn-danger-bg-1: #ff8787;
   --btn-danger-bg-2: #c92a2a;
   --btn-danger-border: #7c1a1a;
+  --btn-danger-text: #ffffff;
 
   --btn-pink-bg-1: #faa2c1;
   --btn-pink-bg-2: #d6336c;
   --btn-pink-border: #a61e4d;
+  --btn-pink-text: #ffffff;
 }
 
 /* Dynamic device accent color overrides */
@@ -315,20 +321,23 @@ body::after {
 
 .pixel-btn.primary {
   background: linear-gradient(180deg, var(--btn-primary-bg-1) 0%, var(--btn-primary-bg-2) 100%);
-  color: var(--accent-mint);
+  color: var(--btn-primary-text);
   border-color: var(--accent-mint) var(--btn-primary-border) var(--btn-primary-border) var(--accent-mint);
+  text-shadow: 1px 1px 0px rgba(0, 0, 0, 0.45);
 }
 
 .pixel-btn.danger {
   background: linear-gradient(180deg, var(--btn-danger-bg-1) 0%, var(--btn-danger-bg-2) 100%);
-  color: var(--accent-red);
+  color: var(--btn-danger-text);
   border-color: var(--accent-red) var(--btn-danger-border) var(--btn-danger-border) var(--accent-red);
+  text-shadow: 1px 1px 0px rgba(0, 0, 0, 0.45);
 }
 
 .pixel-btn.pink {
   background: linear-gradient(180deg, var(--btn-pink-bg-1) 0%, var(--btn-pink-bg-2) 100%);
-  color: var(--accent-pink);
+  color: var(--btn-pink-text);
   border-color: var(--accent-pink) var(--btn-pink-border) var(--btn-pink-border) var(--accent-pink);
+  text-shadow: 1px 1px 0px rgba(0, 0, 0, 0.45);
 }
 
 /* ── Pixel Tab ─────────────────────────────── */

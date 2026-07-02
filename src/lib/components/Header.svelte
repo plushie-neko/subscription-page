@@ -4,7 +4,7 @@
 
   const t = $derived(createTranslator($currentLang, $config?.baseTranslations));
   import { constructSubscriptionUrl } from '$lib/utils/format';
-  import { theme, useDeviceAccent, toggleTheme, toggleDeviceAccent } from '$lib/stores/theme';
+  import { theme, toggleTheme } from '$lib/stores/theme';
   import { renderSVG } from 'uqr';
 
   let showQrModal = $state(false);
@@ -60,16 +60,6 @@
     </div>
 
     <div class="header-actions">
-      <!-- Device Accent Toggle -->
-      <button 
-        class="icon-btn header-btn" 
-        class:active={$useDeviceAccent}
-        onclick={toggleDeviceAccent} 
-        title="Match Device Accent Color"
-      >
-        <iconify-icon icon="pixelarticons:paint-bucket"></iconify-icon>
-      </button>
-
       <!-- Theme Toggle -->
       <button 
         class="icon-btn header-btn" 
