@@ -1,6 +1,8 @@
 <script lang="ts">
   import { config, currentLang, subscription, availablePlatforms } from '$lib/stores/subscription';
-  import { t } from '$lib/utils/i18n';
+  import { createTranslator } from '$lib/utils/i18n';
+
+  const t = $derived(createTranslator($currentLang, $config?.baseTranslations));
   import { constructSubscriptionUrl, formatTemplate } from '$lib/utils/format';
   import type { PlatformKey, PlatformAppBlock, PlatformAppButton } from '$lib/types';
 

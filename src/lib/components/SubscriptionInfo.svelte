@@ -1,7 +1,9 @@
 <script lang="ts">
   import { subscription, config, currentLang } from '$lib/stores/subscription';
   import { formatDate, getExpirationText, bandwidthProgress } from '$lib/utils/format';
-  import { t } from '$lib/utils/i18n';
+  import { createTranslator } from '$lib/utils/i18n';
+
+  const t = $derived(createTranslator($currentLang, $config?.baseTranslations));
 
   const user = $derived($subscription?.user);
 

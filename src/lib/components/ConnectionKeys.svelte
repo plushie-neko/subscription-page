@@ -1,7 +1,9 @@
 <script lang="ts">
-  import { subscription, config } from '$lib/stores/subscription';
+  import { subscription, config, currentLang } from '$lib/stores/subscription';
   import { parseLinkName } from '$lib/utils/format';
-  import { t } from '$lib/utils/i18n';
+  import { createTranslator } from '$lib/utils/i18n';
+
+  const t = $derived(createTranslator($currentLang, $config?.baseTranslations));
   import { renderSVG } from 'uqr';
 
   const links = $derived($subscription?.links ?? []);

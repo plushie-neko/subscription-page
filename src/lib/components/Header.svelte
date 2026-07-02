@@ -1,6 +1,8 @@
 <script lang="ts">
   import { config, currentLang, subscription } from '$lib/stores/subscription';
-  import { t } from '$lib/utils/i18n';
+  import { createTranslator } from '$lib/utils/i18n';
+
+  const t = $derived(createTranslator($currentLang, $config?.baseTranslations));
   import { constructSubscriptionUrl } from '$lib/utils/format';
   import { theme, useDeviceAccent, toggleTheme, toggleDeviceAccent } from '$lib/stores/theme';
   import { renderSVG } from 'uqr';
