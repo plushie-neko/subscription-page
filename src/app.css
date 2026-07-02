@@ -667,3 +667,83 @@ body::after {
     font-size: 9px;
   }
 }
+
+/* ── RTL Farsi Font Size Scaling Overrides ── */
+[dir="rtl"] .brand-name {
+  font-size: 18px !important;
+}
+
+[dir="rtl"] .section-title {
+  font-size: 15px !important;
+}
+
+[dir="rtl"] .pixel-btn {
+  font-size: 14px !important;
+  padding: 12px 18px !important;
+}
+
+[dir="rtl"] .pixel-tab,
+[dir="rtl"] .app-btn,
+[dir="rtl"] .key-count {
+  font-size: 13px !important;
+}
+
+[dir="rtl"] .stat-card .stat-icon {
+  font-size: 22px !important;
+}
+
+[dir="rtl"] .stat-card .stat-label {
+  font-size: 12px !important;
+}
+
+[dir="rtl"] .stat-card .stat-value,
+[dir="rtl"] .bandwidth-val {
+  font-size: 15px !important;
+}
+
+[dir="rtl"] .stat-sub {
+  font-size: 11px !important;
+}
+
+[dir="rtl"] .block-title {
+  font-size: 15px !important;
+}
+
+[dir="rtl"] .block-desc,
+[dir="rtl"] .step-text {
+  font-size: 16px !important;
+  line-height: 1.7 !important;
+}
+
+[dir="rtl"] .step-number {
+  font-size: 13px !important;
+}
+
+[dir="rtl"] .key-name {
+  font-size: 13px !important;
+}
+
+[dir="rtl"] .qr-title {
+  font-size: 14px !important;
+}
+
+[dir="rtl"] .qr-hint {
+  font-size: 12px !important;
+  line-height: 1.7 !important;
+}
+
+[dir="rtl"] .footer-text {
+  font-size: 12px !important;
+}
+
+[dir="rtl"] .footer-sub {
+  font-size: 11px !important;
+}
+
+[dir="rtl"] .error-title {
+  font-size: 16px !important;
+}
+
+[dir="rtl"] .error-subtitle {
+  font-size: 15px !important;
+}
