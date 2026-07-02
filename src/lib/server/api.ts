@@ -1,3 +1,4 @@
+import axios from 'axios';
 import { getAppConfig } from './config';
 import type { SubscriptionData, SubpageConfig } from '$lib/types';
 
@@ -75,61 +76,64 @@ function setToCache<T>(key: string, value: T, cache: Map<string, CacheEntry<T>>)
 /**
  * Filter client request headers, removing connection-specific and security-sensitive headers
  */
-export function filterHeaders(headers: Headers): Headers {
-	const newHeaders = new Headers();
+export function filterHeaders(headers: Headers): Record<string, string> {
+	const newHeaders: Record<string, string> = {};
 	headers.forEach((value, key) => {
 		if (!IGNORED_HEADERS.has(key.toLowerCase())) {
-			newHeaders.set(key, value);
+			newHeaders[key] = value;
 		}
 	});
 	return newHeaders;
 }
 
 /**
- * Prepare custom headers for requests to the Remnawave panel
+ * Get an Axios instance configured for the Remnawave Panel
  */
-function preparePanelHeaders(clientIp?: string, customHeaders?: Headers): Headers {
+function getAxiosClient(clientIp?: string, customHeaders?: Headers) {
 	const config = getAppConfig();
-	const headers = new Headers();
-
-	// Basic Authorization and UA
-	headers.set('user-agent', 'Remnawave Subscription Page');
-	headers.set('Authorization', `Bearer ${config.REMNAWAVE_API_TOKEN}`);
+	const headers: Record<string, string> = {
+		'user-agent': 'Remnawave Subscription Page',
+		'Authorization': `Bearer ${config.REMNAWAVE_API_TOKEN}`
+	};
 
 	// Optional Addons
 	if (config.CADDY_AUTH_API_TOKEN) {
-		headers.set('X-Api-Key', config.CADDY_AUTH_API_TOKEN);
+		headers['X-Api-Key'] = config.CADDY_AUTH_API_TOKEN;
 	}
 	if (config.CLOUDFLARE_ZERO_TRUST_CLIENT_ID && config.CLOUDFLARE_ZERO_TRUST_CLIENT_SECRET) {
-		headers.set('CF-Access-Client-Id', config.CLOUDFLARE_ZERO_TRUST_CLIENT_ID);
-		headers.set('CF-Access-Client-Secret', config.CLOUDFLARE_ZERO_TRUST_CLIENT_SECRET);
+		headers['CF-Access-Client-Id'] = config.CLOUDFLARE_ZERO_TRUST_CLIENT_ID;
+		headers['CF-Access-Client-Secret'] = config.CLOUDFLARE_ZERO_TRUST_CLIENT_SECRET;
 	}
 	if (config.EGAMES_COOKIE) {
-		headers.set('Cookie', config.EGAMES_COOKIE);
+		headers['Cookie'] = config.EGAMES_COOKIE;
 	}
 
 	// For loopback or proxy forwarding
 	if (config.REMNAWAVE_PANEL_URL.startsWith('http://')) {
-		headers.set('X-Forwarded-For', '127.0.0.1');
-		headers.set('X-Forwarded-Proto', 'https');
+		headers['X-Forwarded-For'] = '127.0.0.1';
+		headers['X-Forwarded-Proto'] = 'https';
 	}
 
 	// Forward client request headers if passed (except ignored ones)
 	if (customHeaders) {
 		customHeaders.forEach((value, key) => {
 			if (!IGNORED_HEADERS.has(key.toLowerCase())) {
-				headers.set(key, value);
+				headers[key] = value;
 			}
 		});
 	}
 
 	// Inject Real IP
 	if (clientIp) {
-		headers.set('X-Real-IP', clientIp);
-		headers.set('X-Forwarded-For', clientIp);
+		headers['X-Real-IP'] = clientIp;
+		headers['X-Forwarded-For'] = clientIp;
 	}
 
-	return headers;
+	return axios.create({
+		baseURL: config.REMNAWAVE_PANEL_URL,
+		timeout: 10000,
+		headers
+	});
 }
 
 /**
@@ -142,17 +146,9 @@ export async function getSubscriptionInfo(clientIp: string, shortUuid: string): 
 	}
 
 	try {
-		const response = await fetch(`${config.REMNAWAVE_PANEL_URL}/api/sub/${shortUuid}/info`, {
-			method: 'GET',
-			headers: preparePanelHeaders(clientIp)
-		});
-
-		if (!response.ok) {
-			console.error(`Failed to fetch subscription info: ${response.status} ${response.statusText}`);
-			return null;
-		}
-
-		return await response.json();
+		const client = getAxiosClient(clientIp);
+		const response = await client.get(`/api/sub/${encodeURIComponent(shortUuid)}/info`);
+		return response.data;
 	} catch (e) {
 		console.error('Error fetching subscription info:', e);
 		return null;
@@ -172,18 +168,10 @@ export async function getSubpageConfigByUuid(uuid: string): Promise<SubpageConfi
 	if (cached) return cached;
 
 	try {
-		const response = await fetch(`${config.REMNAWAVE_PANEL_URL}/api/subscription-page/config/${uuid}`, {
-			method: 'GET',
-			headers: preparePanelHeaders()
-		});
-
-		if (!response.ok) {
-			console.error(`Failed to fetch subpage config ${uuid}: ${response.status}`);
-			return null;
-		}
-
-		const data = await response.json();
-		const subpageConfig = data?.response?.config || null;
+		const client = getAxiosClient();
+		const response = await client.get(`/api/subscription-page/config/${encodeURIComponent(uuid)}`);
+		const subpageConfig = response.data?.response?.config || null;
+		
 		if (subpageConfig) {
 			setToCache(uuid, subpageConfig, configCache);
 		}
@@ -209,39 +197,26 @@ export async function getSubpageConfigByShortUuid(
 	}
 
 	try {
-		// 1. Resolve shortUuid to configUuid and webpageAllowed status
-		const response = await fetch(
-			`${config.REMNAWAVE_PANEL_URL}/api/subscriptions/subpage-config/${shortUuid}`,
-			{
-				method: 'POST', // The command has requestBody containing headers, usually sent via POST or GET with body
-				headers: preparePanelHeaders(clientIp, requestHeaders),
-				body: JSON.stringify({
-					requestHeaders: requestHeaders ? Object.fromEntries(requestHeaders.entries()) : {}
-				})
-			}
-		);
-
-		// Fallback to GET if POST is not accepted (some setups might vary)
-		let responseData;
-		if (!response.ok) {
-			// Try GET
-			const getResponse = await fetch(
-				`${config.REMNAWAVE_PANEL_URL}/api/subscriptions/subpage-config/${shortUuid}`,
-				{
-					method: 'GET',
-					headers: preparePanelHeaders(clientIp, requestHeaders)
-				}
-			);
-			if (!getResponse.ok) {
-				console.error(`Failed to resolve subpage config by shortUuid: ${getResponse.status}`);
-				return { config: null, webpageAllowed: false };
-			}
-			responseData = await getResponse.json();
-		} else {
-			responseData = await response.json();
+		const client = getAxiosClient(clientIp, requestHeaders);
+		
+		// Map headers to Record
+		const reqHeadersRecord: Record<string, string> = {};
+		if (requestHeaders) {
+			requestHeaders.forEach((value, key) => {
+				reqHeadersRecord[key] = value;
+			});
 		}
 
-		const result = responseData?.response;
+		// Perform GET request with body containing client headers (required by backend contract schema)
+		const response = await client.request({
+			method: 'GET',
+			url: `/api/subscriptions/subpage-config/${encodeURIComponent(shortUuid)}`,
+			data: {
+				requestHeaders: reqHeadersRecord
+			}
+		});
+
+		const result = response.data?.response;
 		if (!result) {
 			return { config: null, webpageAllowed: false };
 		}
@@ -252,7 +227,6 @@ export async function getSubpageConfigByShortUuid(
 		}
 
 		// 2. Fetch the actual full configuration object
-		// If subpageConfigUuid is null, resolve default SUBPAGE_CONFIG_UUID
 		const targetUuid = subpageConfigUuid || config.SUBPAGE_CONFIG_UUID;
 		const fullConfig = await getSubpageConfigByUuid(targetUuid);
 
@@ -260,8 +234,8 @@ export async function getSubpageConfigByShortUuid(
 			config: fullConfig,
 			webpageAllowed: true
 		};
-	} catch (e) {
-		console.error('Error resolving subpage config by shortUuid:', e);
+	} catch (e: any) {
+		console.error('Error resolving subpage config by shortUuid:', e?.response?.data || e?.message || e);
 		return { config: null, webpageAllowed: false };
 	}
 }
@@ -281,34 +255,32 @@ export async function getSubscription(
 	}
 
 	try {
-		let path = `/api/sub/${shortUuid}`;
+		let path = `/api/sub/${encodeURIComponent(shortUuid)}`;
 		if (clientType) {
-			path += `/${clientType}`;
+			path += `/${encodeURIComponent(clientType)}`;
 		}
 
-		const reqHeaders = preparePanelHeaders(clientIp, headers);
-
-		const response = await fetch(`${config.REMNAWAVE_PANEL_URL}${path}`, {
-			method: 'GET',
-			headers: reqHeaders
+		const client = getAxiosClient(clientIp, headers);
+		const response = await client.get(path, {
+			responseType: 'text',
+			// Don't throw errors for status codes >= 400 (let us proxy them natively)
+			validateStatus: () => true
 		});
 
 		if (response.status === 404) {
 			return null;
 		}
 
-		const body = await response.text();
 		const responseHeaders = new Headers();
-
 		// Forward headers from panel, ignoring transport/connection specific ones
-		response.headers.forEach((value, key) => {
-			if (!IGNORED_HEADERS.has(key.toLowerCase())) {
-				responseHeaders.set(key, value);
+		Object.entries(response.headers).forEach(([key, value]) => {
+			if (!IGNORED_HEADERS.has(key.toLowerCase()) && value !== undefined) {
+				responseHeaders.set(key, String(value));
 			}
 		});
 
 		return {
-			body,
+			body: response.data,
 			status: response.status,
 			headers: responseHeaders
 		};

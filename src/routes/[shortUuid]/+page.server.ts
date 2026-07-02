@@ -6,6 +6,12 @@ import { signSessionToken } from '$lib/server/jwt';
 
 export const load: PageServerLoad = async ({ params, request, cookies, getClientAddress }) => {
 	const { shortUuid } = params;
+
+	// Exclude requests for static files/assets that leak into dynamic routing
+	if (shortUuid.includes('.') || ['favicon.ico', 'favicon.png', 'robots.txt', 'sitemap.xml', 'assets'].includes(shortUuid)) {
+		return { error: 'Not found', status: 404 };
+	}
+
 	const config = getAppConfig();
 
 	// Fallback to mock data if not fully configured (dev mode helper)
