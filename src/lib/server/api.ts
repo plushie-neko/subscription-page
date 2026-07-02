@@ -156,6 +156,25 @@ export async function getSubscriptionInfo(clientIp: string, shortUuid: string): 
 }
 
 /**
+ * Fetch list of all subpage configurations
+ */
+export async function getSubpageConfigList(): Promise<{ uuid: string }[]> {
+	const config = getAppConfig();
+	if (!config.REMNAWAVE_PANEL_URL || !config.REMNAWAVE_API_TOKEN) {
+		return [];
+	}
+
+	try {
+		const client = getAxiosClient();
+		const response = await client.get('/api/subscription-page/config/list');
+		return response.data?.response?.configs || [];
+	} catch (e) {
+		console.error('Error fetching subpage config list:', e);
+		return [];
+	}
+}
+
+/**
  * Fetch subpage config by UUID
  */
 export async function getSubpageConfigByUuid(uuid: string): Promise<SubpageConfig | null> {
@@ -164,20 +183,41 @@ export async function getSubpageConfigByUuid(uuid: string): Promise<SubpageConfi
 		return null;
 	}
 
-	const cached = getFromCache(uuid, configCache);
+	// Resolve dynamic default UUID fallback
+	let targetUuid = uuid;
+	if (uuid === '00000000-0000-0000-0000-000000000000' || uuid === 'default') {
+		const configList = await getSubpageConfigList();
+		if (configList.length > 0) {
+			targetUuid = configList[0].uuid;
+			console.log(`Resolved default subpage UUID to active config: ${targetUuid}`);
+		} else {
+			console.error('No subpage configurations found on the panel.');
+			return null;
+		}
+	}
+
+	const cached = getFromCache(targetUuid, configCache);
 	if (cached) return cached;
 
 	try {
 		const client = getAxiosClient();
-		const response = await client.get(`/api/subscription-page/config/${encodeURIComponent(uuid)}`);
+		const response = await client.get(`/api/subscription-page/config/${encodeURIComponent(targetUuid)}`);
 		const subpageConfig = response.data?.response?.config || null;
 		
 		if (subpageConfig) {
-			setToCache(uuid, subpageConfig, configCache);
+			setToCache(targetUuid, subpageConfig, configCache);
 		}
 		return subpageConfig;
-	} catch (e) {
-		console.error(`Error fetching subpage config ${uuid}:`, e);
+	} catch (e: any) {
+		// Fallback to first available config on 404
+		if (e?.response?.status === 404 && targetUuid !== '00000000-0000-0000-0000-000000000000') {
+			console.warn(`Config UUID ${targetUuid} not found on panel. Attempting fallback to first config in list.`);
+			const configList = await getSubpageConfigList();
+			if (configList.length > 0 && configList[0].uuid !== targetUuid) {
+				return await getSubpageConfigByUuid(configList[0].uuid);
+			}
+		}
+		console.error(`Error fetching subpage config ${targetUuid}:`, e?.message || e);
 		return null;
 	}
 }
