@@ -123,3 +123,10 @@ body {
 	background: var(--md-sys-color-primary, #B39DDB);
 	color: var(--md-sys-color-on-primary, #1a1a2e);
 }
+
+/* ── SVG Icon Fill Override ── */
+/* Prevents BeerCSS's global "svg { fill: currentcolor }" from turning outline icons into solid blocks */
+svg[fill="none"],
+svg[fill="none"] * {
+	fill: none !important;
+}
