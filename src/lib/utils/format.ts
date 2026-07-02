@@ -3,6 +3,7 @@
  */
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime.js';
+import { createHappCryptoLink } from '@kastov/cryptohapp';
 
 // Import locales for dayjs
 import 'dayjs/locale/ru.js';
@@ -101,15 +102,33 @@ export function constructSubscriptionUrl(currentHref: string, shortUuid: string)
 
 /**
  * Template engine for subscription URLs in button links.
- * Replaces {{subscriptionUrl}}, {{username}} placeholders.
+ * Replaces {{SUBSCRIPTION_LINK}}, {{subscriptionUrl}}, {{USERNAME}}, {{username}}, and crypto link templates.
  */
 export function formatTemplate(
 	template: string,
 	vars: { subscriptionUrl: string; username: string }
 ): string {
-	return template
-		.replace(/\{\{subscriptionUrl\}\}/g, vars.subscriptionUrl)
-		.replace(/\{\{username\}\}/g, vars.username);
+	if (!template) return '';
+
+	const lazyValues: Record<string, (() => string | undefined) | string | undefined> = {
+		USERNAME: vars.username,
+		username: vars.username,
+		SUBSCRIPTION_LINK: vars.subscriptionUrl,
+		subscriptionUrl: vars.subscriptionUrl,
+		HAPP_CRYPT3_LINK: () => createHappCryptoLink(vars.subscriptionUrl, 'v3', true) || 'unknown',
+		HAPP_CRYPT4_LINK: () => createHappCryptoLink(vars.subscriptionUrl, 'v4', true) || 'unknown'
+	};
+
+	return template.replace(/\{\{(\w+)\}\}/g, (match, key) => {
+		const val = lazyValues[key];
+		if (val !== undefined) {
+			const resolved = typeof val === 'function' ? val() : val;
+			if (resolved !== undefined) {
+				return resolved.toString();
+			}
+		}
+		return match;
+	});
 }
 
 /**

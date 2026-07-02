@@ -10,4 +10,8 @@ declare global {
 	}
 }
 
+declare module '@kastov/cryptohapp' {
+	export function createHappCryptoLink(url: string, version: string, flag: boolean): string | undefined;
+}
+
 export {};

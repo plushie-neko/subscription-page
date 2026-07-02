@@ -30,6 +30,13 @@
 		}
 	});
 
+	// Handle RTL layout for Persian language
+	$effect(() => {
+		if (typeof document !== 'undefined') {
+			document.documentElement.dir = $currentLang === 'fa' ? 'rtl' : 'ltr';
+		}
+	});
+
 	// Reactive translator
 	let t = $derived(createTranslator($currentLang, $config?.baseTranslations));
 

@@ -23,6 +23,7 @@
 		"vite": "^8.0.16"
 	},
 	"dependencies": {
+		"@kastov/cryptohapp": "^1.1.2",
 		"@lucide/svelte": "^1.23.0",
 		"@material/material-color-utilities": "^0.4.0",
 		"@sveltejs/adapter-node": "^5.5.7",

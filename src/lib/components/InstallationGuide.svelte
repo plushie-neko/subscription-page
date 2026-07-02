@@ -7,6 +7,7 @@
 	import PlatformTabs from './PlatformTabs.svelte';
 	import { ExternalLink, Copy, Link } from '@lucide/svelte';
 	import { getColorGradient, getColorGradientSolid } from '$lib/utils/color';
+	import { formatTemplate } from '$lib/utils/format';
 
 	interface Props {
 		config: SubpageConfig;
@@ -46,9 +47,7 @@
 	}
 
 	function formatLink(link: string): string {
-		return link
-			.replace(/\{\{subscriptionUrl\}\}/g, subscriptionUrl)
-			.replace(/\{\{username\}\}/g, username);
+		return formatTemplate(link, { subscriptionUrl, username });
 	}
 
 	async function handleCopy(text: string) {
