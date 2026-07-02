@@ -1,42 +1,46 @@
 <div class="landing">
-	<div class="landing-card">
-		<h1 class="landing-icon">✦</h1>
-		<h2>Subscription Page</h2>
-		<p>Access your subscription using your personal link.</p>
+	<div class="pixel-card landing-card">
+		<h1 class="landing-icon">🐱✨</h1>
+		<h2>Subscription Portal</h2>
+		<p>Please use your personal subscription link to access your portal, nya~</p>
 	</div>
 </div>
 
 <style>
 	.landing {
-		min-height: 100dvh;
+		min-height: 100vh;
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		font-family: var(--font-display, 'Nunito', sans-serif);
+		padding: 20px;
+		position: relative;
+		z-index: 1;
 	}
 
 	.landing-card {
 		text-align: center;
-		padding: 48px;
-		background: var(--md-sys-color-surface-container-low, #1e1e2e);
-		border-radius: var(--radius-xl, 28px);
-		border: 1px solid rgba(255, 255, 255, 0.08);
+		max-width: 400px;
+		width: 100%;
+		padding: 40px 20px !important;
 	}
 
 	.landing-icon {
 		font-size: 3rem;
-		color: var(--md-sys-color-primary, #B39DDB);
 		margin-bottom: 16px;
+		animation: pixel-bounce 1.2s ease-in-out infinite;
 	}
 
 	h2 {
-		color: var(--md-sys-color-on-surface, #e0e0e0);
-		font-weight: 700;
-		margin: 0 0 8px;
+		font-family: var(--font-pixel);
+		font-size: 14px;
+		color: var(--accent-mint);
+		margin-bottom: 12px;
+		text-shadow: 0 0 8px rgba(126, 252, 202, 0.2);
 	}
 
 	p {
-		color: var(--md-sys-color-on-surface-variant, #999);
-		margin: 0;
+		font-size: 13px;
+		color: var(--text-secondary);
+		line-height: 1.6;
 	}
 </style>

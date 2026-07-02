@@ -1,517 +1,310 @@
-<!--
-  InstallationGuide — Renders different guides (timeline, minimal, accordion, cards)
-  based on config.uiConfig.installationGuidesBlockType, styled with BeerCSS.
--->
 <script lang="ts">
-	import type { SubpageConfig, PlatformKey, PlatformAppButton } from '$lib/types';
-	import PlatformTabs from './PlatformTabs.svelte';
-	import { getColorGradient, getColorGradientSolid } from '$lib/utils/color';
-	import { formatTemplate } from '$lib/utils/format';
+  import { config, currentLang, subscription, availablePlatforms } from '$lib/stores/subscription';
+  import { t } from '$lib/utils/i18n';
+  import { constructSubscriptionUrl, formatTemplate } from '$lib/utils/format';
+  import type { PlatformKey, PlatformAppBlock, PlatformAppButton } from '$lib/types';
 
-	interface Props {
-		config: SubpageConfig;
-		subscriptionUrl: string;
-		username: string;
-		t: (key: string | Record<string, string>) => string;
-	}
+  const platformEmojis: Record<string, string> = {
+    ios: '🍎',
+    android: '🤖',
+    windows: '🪟',
+    macos: '💻',
+    linux: '🐧',
+    androidTV: '📺',
+    appleTV: '📺'
+  };
 
-	let { config, subscriptionUrl, username, t }: Props = $props();
+  let selectedPlatformKey = $state<string | null>(null);
+  let selectedAppIndex = $state(0);
 
-	// Determine available platforms
-	let platforms = $derived(
-		(Object.entries(config.platforms) as [PlatformKey, NonNullable<SubpageConfig['platforms'][PlatformKey]>][])
-			.filter(([_, p]) => p && p.apps.length > 0)
-			.map(([key, p]) => ({ key, ...p }))
-	);
+  // Auto-select first platform
+  $effect(() => {
+    if ($availablePlatforms.length > 0 && !selectedPlatformKey) {
+      selectedPlatformKey = $availablePlatforms[0].key;
+    }
+  });
 
-	let selectedPlatform = $state('');
-	let selectedAppIndex = $state(0);
+  const selectedPlatform = $derived(
+    selectedPlatformKey && $config?.platforms ? $config.platforms[selectedPlatformKey as PlatformKey] : null
+  );
 
-	$effect(() => {
-		if (platforms.length > 0 && !selectedPlatform) {
-			selectedPlatform = platforms[0].key;
-		}
-	});
+  const apps = $derived(selectedPlatform?.apps ?? []);
+  const selectedApp = $derived(apps[selectedAppIndex] ?? apps[0]);
 
-	let currentPlatform = $derived(
-		config.platforms[selectedPlatform as PlatformKey]
-	);
-	let currentApp = $derived(currentPlatform?.apps[selectedAppIndex] ?? currentPlatform?.apps[0]);
+  function selectPlatform(key: string) {
+    selectedPlatformKey = key;
+    selectedAppIndex = 0;
+  }
 
-	function selectPlatform(key: string) {
-		selectedPlatform = key;
-		selectedAppIndex = 0;
-	}
+  function selectApp(index: number) {
+    selectedAppIndex = index;
+  }
 
-	function formatLink(link: string): string {
-		return formatTemplate(link, { subscriptionUrl, username });
-	}
+  const subscriptionUrl = $derived(
+    $subscription
+      ? constructSubscriptionUrl(typeof window !== 'undefined' ? window.location.href : '', $subscription.user.shortUuid)
+      : ''
+  );
 
-	async function handleCopy(text: string) {
-		try {
-			await navigator.clipboard.writeText(formatLink(text));
-		} catch { /* */ }
-	}
+  const username = $derived($subscription?.user?.username ?? '');
 
-	let copied = $state('');
-	async function copyWithFeedback(text: string, id: string) {
-		await handleCopy(text);
-		copied = id;
-		setTimeout(() => copied = '', 2000);
-	}
+  function formatLink(link: string): string {
+    return formatTemplate(link, { subscriptionUrl, username });
+  }
+
+  let copied = $state('');
+
+  async function handleButton(btn: PlatformAppButton, btnId: string) {
+    const formattedUrl = formatLink(btn.link);
+
+    switch (btn.type) {
+      case 'copyButton':
+        try {
+          await navigator.clipboard.writeText(formattedUrl);
+          copied = btnId;
+          setTimeout(() => { copied = ''; }, 2000);
+        } catch {}
+        break;
+      case 'external':
+      case 'subscriptionLink':
+        window.open(formattedUrl, '_blank', 'noopener,noreferrer');
+        break;
+    }
+  }
 </script>
 
-{#if platforms.length > 0}
-	<article class="card elevated installation-guide-card animate-in stagger-2 no-margin">
-		<div class="row align-center guide-header no-space">
-			<h5 class="max font-display no-margin">{t('installationGuideHeader')}</h5>
-		</div>
+{#if $availablePlatforms.length > 0}
+  <section class="install-guide" style="animation: slide-up 0.3s ease both; animation-delay: 0.2s;">
+    <h2 class="section-title">
+      {#if $config?.baseTranslations}{t('installationGuideHeader')}{:else}Quest Log — Setup Guide{/if}
+    </h2>
 
-		<PlatformTabs
-			platforms={platforms}
-			selected={selectedPlatform}
-			svgLibrary={config.svgLibrary}
-			{t}
-			onselect={selectPlatform}
-		/>
+    <div class="pixel-card">
+      <!-- Platform tabs -->
+      <div class="platform-tabs">
+        {#each $availablePlatforms as plat}
+          <button
+            class="pixel-tab"
+            class:active={selectedPlatformKey === plat.key}
+            onclick={() => selectPlatform(plat.key)}
+          >
+            <span class="tab-emoji">{platformEmojis[plat.key] ?? '📱'}</span>
+            <span class="tab-label">{t(plat.displayName)}</span>
+          </button>
+        {/each}
+      </div>
 
-		<!-- App selector pills -->
-		{#if currentPlatform && currentPlatform.apps.length > 1}
-			<div class="row scroll no-space app-pills-row">
-				{#each currentPlatform.apps as app, i (app.name)}
-					<button
-						class="chip"
-						class:fill={i === selectedAppIndex}
-						class:primary={i === selectedAppIndex}
-						class:border={i !== selectedAppIndex}
-						onclick={() => selectedAppIndex = i}
-					>
-						{#if app.featured}
-							<span class="featured-dot"></span>
-						{/if}
-						<span>{app.name}</span>
-					</button>
-				{/each}
-			</div>
-			<div class="space"></div>
-		{/if}
+      <!-- App selector (if multiple apps) -->
+      {#if apps.length > 1}
+        <div class="app-grid">
+          {#each apps as app, i}
+            <button
+              class="app-btn"
+              class:active={selectedAppIndex === i}
+              class:featured={app.featured}
+              onclick={() => selectApp(i)}
+            >
+              {#if app.featured}
+                <span class="featured-star">⭐</span>
+              {/if}
+              <span class="app-name">{app.name}</span>
+            </button>
+          {/each}
+        </div>
+      {/if}
 
-		<!-- Blocks container -->
-		{#if currentApp}
-			{@const blockType = config.uiConfig.installationGuidesBlockType || 'timeline'}
+      <!-- Blocks / Steps -->
+      {#if selectedApp}
+        <div class="blocks">
+          {#each selectedApp.blocks as block, blockIdx}
+            <div class="block-item">
+              <h3 class="block-title">
+                {#if $config?.svgLibrary && $config.svgLibrary[block.svgIconKey]}
+                  <span class="block-icon">{@html $config.svgLibrary[block.svgIconKey]}</span>
+                {:else}
+                  <span class="quest-marker">◆</span>
+                {/if}
+                {t(block.title)}
+              </h3>
 
-			{#if blockType === 'timeline'}
-				<!-- TIMELINE LAYOUT -->
-				<div class="timeline-layout">
-					{#each currentApp.blocks as block, i}
-						{@const gradient = getColorGradientSolid(block.svgIconColor)}
-						<div class="timeline-item animate-in" style="animation-delay: {i * 80 + 100}ms">
-							<div class="timeline-bullet-wrapper">
-								<div
-									class="timeline-bullet circle"
-									style="background: {gradient.background}; border: 1px solid {gradient.border};"
-								>
-									{#if config.svgLibrary[block.svgIconKey]}
-										<span class="icon-wrapper">{@html config.svgLibrary[block.svgIconKey]}</span>
-									{/if}
-								</div>
-								{#if i < currentApp.blocks.length - 1}
-									<div class="timeline-line"></div>
-								{/if}
-							</div>
-							<div class="timeline-content">
-								<h6 class="block-title font-display">{@html t(block.title)}</h6>
-								<p class="block-desc font-body">{@html t(block.description)}</p>
-								{#if block.buttons.length > 0}
-									<nav class="row wrap block-buttons">
-										{#each block.buttons as button, btnIdx}
-											{@render actionButton(button, `${i}-${btnIdx}`, 'border')}
-										{/each}
-									</nav>
-								{/if}
-							</div>
-						</div>
-					{/each}
-				</div>
-			{:else if blockType === 'minimal'}
-				<!-- MINIMAL LAYOUT -->
-				<div class="minimal-layout grid no-space">
-					{#each currentApp.blocks as block, i}
-						{@const gradient = getColorGradient(block.svgIconColor)}
-						<div class="s12 padding-xs minimal-item-cell">
-							<div class="minimal-item animate-in border padding round" style="animation-delay: {i * 80 + 100}ms">
-								<div class="row align-center minimal-header">
-									<div
-										class="minimal-icon circle"
-										style="background: {gradient.background}; border: 1px solid {gradient.border};"
-									>
-										{#if config.svgLibrary[block.svgIconKey]}
-											<span class="icon-wrapper">{@html config.svgLibrary[block.svgIconKey]}</span>
-										{/if}
-									</div>
-									<h6 class="block-title font-display max no-margin">{@html t(block.title)}</h6>
-								</div>
-								<div class="space"></div>
-								<p class="block-desc font-body no-margin">{@html t(block.description)}</p>
-								{#if block.buttons.length > 0}
-									<div class="space"></div>
-									<nav class="row wrap block-buttons no-space">
-										{#each block.buttons as button, btnIdx}
-											{@render actionButton(button, `${i}-${btnIdx}`, 'transparent')}
-										{/each}
-									</nav>
-								{/if}
-							</div>
-						</div>
-					{/each}
-				</div>
-			{:else if blockType === 'accordion'}
-				<!-- ACCORDION LAYOUT -->
-				<div class="accordion-layout">
-					{#each currentApp.blocks as block, i}
-						{@const gradient = getColorGradient(block.svgIconColor)}
-						<details class="border round accordion-details">
-							<summary class="row align-center">
-								<div
-									class="accordion-icon circle"
-									style="background: {gradient.background}; border: 1px solid {gradient.border};"
-								>
-									{#if config.svgLibrary[block.svgIconKey]}
-										<span class="icon-wrapper">{@html config.svgLibrary[block.svgIconKey]}</span>
-									{/if}
-								</div>
-								<h6 class="block-title font-display max no-margin">{@html t(block.title)}</h6>
-								<i>expand_more</i>
-							</summary>
-							<div class="accordion-body-content">
-								<p class="block-desc font-body">{@html t(block.description)}</p>
-								{#if block.buttons.length > 0}
-									<nav class="row wrap block-buttons">
-										{#each block.buttons as button, btnIdx}
-											{@render actionButton(button, `${i}-${btnIdx}`, 'border')}
-										{/each}
-									</nav>
-								{/if}
-							</div>
-						</details>
-					{/each}
-				</div>
-			{:else if blockType === 'cards'}
-				<!-- CARDS LAYOUT -->
-				<div class="cards-layout">
-					{#each currentApp.blocks as block, i}
-						{@const gradient = getColorGradient(block.svgIconColor)}
-						<article class="card border round padding card-item animate-in" style="animation-delay: {i * 80 + 100}ms">
-							<div class="row align-top">
-								<div
-									class="card-icon circle"
-									style="background: {gradient.background}; border: 1px solid {gradient.border};"
-								>
-									{#if config.svgLibrary[block.svgIconKey]}
-										<span class="icon-wrapper">{@html config.svgLibrary[block.svgIconKey]}</span>
-									{/if}
-								</div>
-								<div class="max card-right-box">
-									<h6 class="block-title font-display no-margin">{@html t(block.title)}</h6>
-									<div class="space"></div>
-									<p class="block-desc font-body no-margin">{@html t(block.description)}</p>
-									{#if block.buttons.length > 0}
-										<div class="space"></div>
-										<nav class="row wrap block-buttons">
-											{#each block.buttons as button, btnIdx}
-												{@render actionButton(button, `${i}-${btnIdx}`, 'border')}
-											{/each}
-										</nav>
-									{/if}
-								</div>
-							</div>
-						</article>
-					{/each}
-				</div>
-			{/if}
-		{/if}
-	</article>
+              {#if block.description}
+                <p class="block-desc">{@html t(block.description)}</p>
+              {/if}
+
+              {#if block.buttons && block.buttons.length > 0}
+                <div class="block-buttons">
+                  {#each block.buttons as btn, btnIdx}
+                    {@const btnId = `${blockIdx}-${btnIdx}`}
+                    <button
+                      class="pixel-btn"
+                      class:primary={btn.type === 'external' || btn.type === 'subscriptionLink'}
+                      class:pink={btn.type === 'copyButton'}
+                      onclick={() => handleButton(btn, btnId)}
+                    >
+                      {#if copied === btnId}
+                        ✅ {#if $config?.baseTranslations}{t({ en: 'Copied', ru: 'Скопировано' })}{:else}Copied!{/if}
+                      {:else}
+                        {#if $config?.svgLibrary && $config.svgLibrary[btn.svgIconKey]}
+                          <span class="btn-svg">{@html $config.svgLibrary[btn.svgIconKey]}</span>
+                        {/if}
+                        {t(btn.text)}
+                      {/if}
+                    </button>
+                  {/each}
+                </div>
+              {/if}
+            </div>
+          {/each}
+        </div>
+      {/if}
+    </div>
+  </section>
 {/if}
 
-<!-- Reusable Button Snippet -->
-{#snippet actionButton(button: PlatformAppButton, btnId: string, styleType: string)}
-	{@const href = formatLink(button.link)}
-	{#if button.type === 'external'}
-		<a
-			class="button {styleType} round action-btn"
-			href={button.link}
-			target="_blank"
-			rel="noopener noreferrer"
-		>
-			{#if config.svgLibrary[button.svgIconKey]}
-				<span class="btn-icon">{@html config.svgLibrary[button.svgIconKey]}</span>
-			{:else}
-				<i>open_in_new</i>
-			{/if}
-			<span>{t(button.text)}</span>
-		</a>
-	{:else if button.type === 'subscriptionLink'}
-		<a
-			class="button fill primary round action-btn"
-			href={href}
-			target="_blank"
-			rel="noopener noreferrer"
-		>
-			{#if config.svgLibrary[button.svgIconKey]}
-				<span class="btn-icon">{@html config.svgLibrary[button.svgIconKey]}</span>
-			{:else}
-				<i>link</i>
-			{/if}
-			<span>{t(button.text)}</span>
-		</a>
-	{:else if button.type === 'copyButton'}
-		<button
-			class="button {styleType} round action-btn"
-			class:success-button={copied === btnId}
-			onclick={() => copyWithFeedback(button.link, btnId)}
-		>
-			{#if copied === btnId}
-				<i>check</i>
-			{:else if config.svgLibrary[button.svgIconKey]}
-				<span class="btn-icon">{@html config.svgLibrary[button.svgIconKey]}</span>
-			{:else}
-				<i>content_copy</i>
-			{/if}
-			<span>{copied === btnId ? t({ en: 'Copied', ru: 'Скопировано' }) : t(button.text)}</span>
-		</button>
-	{/if}
-{/snippet}
-
 <style>
-	.installation-guide-card {
-		background: var(--surface-container-low) !important;
-		border-radius: var(--radius-lg) !important;
-		border: 1px solid var(--glass-border) !important;
-		padding: var(--space-lg) !important;
-	}
+  .platform-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 16px;
+  }
 
-	.guide-header {
-		margin-bottom: var(--space-md);
-	}
+  .tab-emoji {
+    font-size: 14px;
+  }
 
-	.app-pills-row {
-		gap: 6px;
-	}
+  .tab-label {
+    display: inline;
+  }
 
-	.featured-dot {
-		width: 6px;
-		height: 6px;
-		border-radius: 50%;
-		background: var(--tertiary);
-		display: inline-block;
-		margin-right: 4px;
-	}
+  @media (max-width: 500px) {
+    .tab-label {
+      display: none;
+    }
+    .platform-tabs :global(.pixel-tab) {
+      padding: 10px 12px;
+    }
+  }
 
-	.block-title {
-		font-weight: 600;
-		color: var(--on-surface);
-	}
+  .app-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border-light);
+  }
 
-	.block-desc {
-		font-size: var(--text-body-sm);
-		color: var(--on-surface-variant);
-		line-height: 1.6;
-		margin-top: 4px;
-	}
+  .app-btn {
+    font-family: var(--font-pixel);
+    font-size: 9px;
+    padding: 8px 14px;
+    background: var(--bg-card);
+    color: var(--text-secondary);
+    border: 2px solid rgba(255,255,255,0.06);
+    cursor: pointer;
+    position: relative;
+    transition: all 0.1s;
+  }
 
-	.block-buttons {
-		gap: var(--space-sm);
-		margin-top: var(--space-sm);
-	}
+  .app-btn:hover {
+    background: var(--bg-card-hover);
+    color: var(--text-primary);
+  }
 
-	.action-btn {
-		font-family: var(--font-body);
-		font-size: var(--text-label-md);
-		font-weight: 500;
-		height: auto !important;
-		padding: 8px 16px !important;
-	}
+  .app-btn.active {
+    background: var(--bg-elevated);
+    color: var(--accent-cyan);
+    border-color: var(--accent-cyan);
+  }
 
-	.btn-icon {
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		width: 18px;
-		height: 18px;
-	}
+  .app-btn.featured {
+    border-color: rgba(255, 215, 0, 0.3);
+  }
 
-	.btn-icon :global(svg) {
-		width: 18px;
-		height: 18px;
-		fill: currentColor;
-	}
+  .featured-star {
+    font-size: 8px;
+    position: absolute;
+    top: -4px;
+    right: -4px;
+  }
 
-	.icon-wrapper {
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		width: 18px;
-		height: 18px;
-		color: inherit;
-		fill: currentColor;
-	}
+  .app-name {
+    white-space: nowrap;
+  }
 
-	.icon-wrapper :global(svg) {
-		width: 18px;
-		height: 18px;
-		fill: currentColor;
-	}
+  /* Blocks */
+  .blocks {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
 
-	/* ── 1. Timeline Layout ── */
-	.timeline-layout {
-		display: flex;
-		flex-direction: column;
-	}
+  .block-item {
+    padding: 16px;
+    background: rgba(255,255,255,0.01);
+    border: 1px solid rgba(255,255,255,0.04);
+    border-left: 3px solid var(--accent-lavender);
+    position: relative;
+  }
 
-	.timeline-item {
-		display: flex;
-		gap: var(--space-md);
-	}
+  .block-title {
+    font-family: var(--font-pixel);
+    font-size: 10px;
+    color: var(--accent-lavender);
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
 
-	.timeline-bullet-wrapper {
-		display: flex;
-		flex-direction: column;
-		align-items: center;
-		flex-shrink: 0;
-	}
+  .block-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 16px;
+    height: 16px;
+    fill: currentColor;
+    color: var(--accent-pink);
+  }
 
-	.timeline-bullet {
-		width: 36px;
-		height: 36px;
-		z-index: 2;
-		color: white;
-	}
+  .block-icon :global(svg) {
+    width: 100%;
+    height: 100%;
+  }
 
-	.timeline-line {
-		width: 2px;
-		background: var(--glass-border);
-		flex: 1;
-		margin: 4px 0;
-	}
+  .quest-marker {
+    color: var(--accent-pink);
+    font-size: 12px;
+  }
 
-	.timeline-content {
-		flex: 1;
-		padding-bottom: var(--space-xl);
-	}
+  .block-desc {
+    font-size: 13px;
+    color: var(--text-secondary);
+    margin-bottom: 12px;
+    line-height: 1.5;
+  }
 
-	.timeline-item:last-child .timeline-content {
-		padding-bottom: 0;
-	}
+  /* Buttons */
+  .block-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 4px;
+  }
 
-	/* ── 2. Minimal Layout ── */
-	.minimal-layout {
-		margin-top: calc(-1 * var(--space-xs));
-	}
+  .btn-svg {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 10px;
+    height: 10px;
+    fill: currentColor;
+    margin-right: 4px;
+  }
 
-	.padding-xs {
-		padding: 4px !important;
-	}
-
-	.minimal-item {
-		background: var(--surface-container-lowest) !important;
-		border-color: var(--glass-border) !important;
-		transition: all var(--transition-normal);
-	}
-
-	.minimal-item:hover {
-		background: color-mix(in srgb, var(--on-surface) 3%, var(--surface-container-lowest)) !important;
-	}
-
-	.minimal-icon {
-		width: 32px;
-		height: 32px;
-		color: white;
-		flex-shrink: 0;
-	}
-
-	/* ── 3. Accordion Layout ── */
-	.accordion-layout {
-		display: flex;
-		flex-direction: column;
-		gap: var(--space-sm);
-	}
-
-	.accordion-details {
-		background: var(--surface-container-lowest) !important;
-		border-color: var(--glass-border) !important;
-		transition: all var(--transition-normal);
-		overflow: hidden;
-	}
-
-	.accordion-details[open] {
-		background: color-mix(in srgb, var(--on-surface) 2%, var(--surface-container-lowest)) !important;
-		border-color: var(--outline-variant) !important;
-	}
-
-	.accordion-details summary {
-		padding: var(--space-md) !important;
-		cursor: pointer;
-		user-select: none;
-		list-style: none;
-	}
-
-	.accordion-details summary::-webkit-details-marker {
-		display: none;
-	}
-
-	.accordion-icon {
-		width: 32px;
-		height: 32px;
-		color: white;
-		flex-shrink: 0;
-	}
-
-	.accordion-body-content {
-		padding: 0 var(--space-md) var(--space-md) calc(var(--space-md) + 32px + var(--space-sm));
-	}
-
-	/* ── 4. Cards Layout ── */
-	.cards-layout {
-		display: flex;
-		flex-direction: column;
-		gap: var(--space-md);
-	}
-
-	.card-item {
-		background: var(--surface-container-lowest) !important;
-		border-color: var(--glass-border) !important;
-		transition: all var(--transition-normal);
-	}
-
-	.card-item:hover {
-		background: color-mix(in srgb, var(--on-surface) 3%, var(--surface-container-lowest)) !important;
-		border-color: var(--outline-variant) !important;
-		transform: translateY(-2px);
-	}
-
-	.card-icon {
-		width: 36px;
-		height: 36px;
-		color: white;
-		flex-shrink: 0;
-	}
-
-	.card-right-box {
-		padding-left: var(--space-sm);
-	}
-
-	.success-button {
-		background: var(--color-success) !important;
-		color: #1a1a2e !important;
-	}
-
-	@media (max-width: 480px) {
-		.installation-guide-card {
-			padding: var(--space-md) !important;
-		}
-
-		.accordion-body-content {
-			padding-left: var(--space-md);
-		}
-	}
+  .btn-svg :global(svg) {
+    width: 100%;
+    height: 100%;
+  }
 </style>

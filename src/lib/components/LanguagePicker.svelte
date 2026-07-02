@@ -1,74 +1,61 @@
-<!--
-  LanguagePicker — BeerCSS dropdown for locale selection.
--->
 <script lang="ts">
-	interface Props {
-		locales: string[];
-		currentLang: string;
-		onchange: (lang: string) => void;
-	}
+  import { config, currentLang, setLanguage } from '$lib/stores/subscription';
 
-	let { locales, currentLang, onchange }: Props = $props();
+  const locales = $derived($config?.locales ?? []);
+  
+  const localeNames: Record<string, string> = {
+    en: '🇬🇧 EN',
+    ru: '🇷🇺 RU',
+    zh: '🇨🇳 ZH',
+    ja: '🇯🇵 JA',
+    ko: '🇰🇷 KO',
+    de: '🇩🇪 DE',
+    fr: '🇫🇷 FR',
+    es: '🇪🇸 ES',
+    pt: '🇧🇷 PT',
+    tr: '🇹🇷 TR',
+    uk: '🇺🇦 UK',
+    fa: '🇮🇷 FA',
+    ar: '🇸🇦 AR'
+  };
 
-	const LOCALE_LABELS: Record<string, string> = {
-		en: '🇬🇧 English',
-		ru: '🇷🇺 Русский',
-		uk: '🇺🇦 Українська',
-		de: '🇩🇪 Deutsch',
-		fr: '🇫🇷 Français',
-		es: '🇪🇸 Español',
-		zh: '🇨🇳 中文',
-		ja: '🇯🇵 日本語',
-		ko: '🇰🇷 한국어',
-		ar: '🇸🇦 العربية',
-		fa: '🇮🇷 فارسی',
-		tr: '🇹🇷 Türkçe',
-		pt: '🇧🇷 Português',
-		it: '🇮🇹 Italiano',
-	};
-
-	function getLabel(code: string): string {
-		return LOCALE_LABELS[code] ?? code.toUpperCase();
-	}
+  function getLocaleName(code: string): string {
+    return localeNames[code] ?? code.toUpperCase();
+  }
 </script>
 
 {#if locales.length > 1}
-	<div class="field round fill prefix suffix no-margin animate-in stagger-5 lang-picker-field">
-		<i>language</i>
-		<select
-			value={currentLang}
-			onchange={(e) => onchange(e.currentTarget.value)}
-		>
-			{#each locales as locale (locale)}
-				<option value={locale}>{getLabel(locale)}</option>
-			{/each}
-		</select>
-		<i>arrow_drop_down</i>
-	</div>
+  <div class="lang-picker" style="animation: slide-up 0.3s ease both; animation-delay: 0.4s;">
+    <div class="lang-buttons">
+      {#each locales as locale}
+        <button
+          class="pixel-tab lang-btn"
+          class:active={$currentLang === locale}
+          onclick={() => setLanguage(locale)}
+        >
+          {getLocaleName(locale)}
+        </button>
+      {/each}
+    </div>
+  </div>
 {/if}
 
 <style>
-	.lang-picker-field {
-		max-width: 220px;
-		margin: 0 auto;
-		background: var(--surface-container) !important;
-		border: 1px solid var(--glass-border) !important;
-		transition: all var(--transition-fast);
-	}
-	
-	.lang-picker-field:hover {
-		border-color: var(--outline) !important;
-	}
+  .lang-picker {
+    display: flex;
+    justify-content: center;
+    padding: 8px 0;
+  }
 
-	.lang-picker-field select {
-		font-family: var(--font-body);
-		font-size: var(--text-label-lg);
-		color: var(--on-surface) !important;
-		cursor: pointer;
-	}
+  .lang-buttons {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
 
-	.lang-picker-field option {
-		background: var(--surface-container-high) !important;
-		color: var(--on-surface) !important;
-	}
+  .lang-btn {
+    font-size: 9px;
+    padding: 6px 12px;
+  }
 </style>
