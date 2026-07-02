@@ -94,7 +94,7 @@
 /* RTL / Farsi Typography Overrides */
 :root[dir="rtl"] {
   --font-pixel: 'Erfan', 'Vazirmatn', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
-  --font-body: 'Erfan', 'Vazirmatn', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-body: 'Vazirmatn', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
 :root.light {
@@ -670,35 +670,35 @@ body::after {
 
 /* ── RTL Farsi Font Size Scaling Overrides ── */
 [dir="rtl"] .brand-name {
-  font-size: 18px !important;
+  font-size: 20px !important;
 }
 
 [dir="rtl"] .section-title {
-  font-size: 15px !important;
+  font-size: 16px !important;
 }
 
 [dir="rtl"] .pixel-btn {
-  font-size: 14px !important;
-  padding: 12px 18px !important;
+  font-size: 15px !important;
+  padding: 12px 20px !important;
 }
 
 [dir="rtl"] .pixel-tab,
 [dir="rtl"] .app-btn,
 [dir="rtl"] .key-count {
-  font-size: 13px !important;
+  font-size: 14px !important;
 }
 
 [dir="rtl"] .stat-card .stat-icon {
-  font-size: 22px !important;
+  font-size: 24px !important;
 }
 
 [dir="rtl"] .stat-card .stat-label {
-  font-size: 12px !important;
+  font-size: 11px !important;
 }
 
 [dir="rtl"] .stat-card .stat-value,
 [dir="rtl"] .bandwidth-val {
-  font-size: 15px !important;
+  font-size: 16px !important;
 }
 
 [dir="rtl"] .stat-sub {
@@ -706,13 +706,13 @@ body::after {
 }
 
 [dir="rtl"] .block-title {
-  font-size: 15px !important;
+  font-size: 16px !important;
 }
 
 [dir="rtl"] .block-desc,
 [dir="rtl"] .step-text {
-  font-size: 16px !important;
-  line-height: 1.7 !important;
+  font-size: 14.5px !important;
+  line-height: 1.6 !important;
 }
 
 [dir="rtl"] .step-number {
@@ -720,30 +720,30 @@ body::after {
 }
 
 [dir="rtl"] .key-name {
-  font-size: 13px !important;
+  font-size: 14px !important;
 }
 
 [dir="rtl"] .qr-title {
-  font-size: 14px !important;
+  font-size: 15px !important;
 }
 
 [dir="rtl"] .qr-hint {
   font-size: 12px !important;
-  line-height: 1.7 !important;
+  line-height: 1.6 !important;
 }
 
 [dir="rtl"] .footer-text {
-  font-size: 12px !important;
-}
-
-[dir="rtl"] .footer-sub {
   font-size: 11px !important;
 }
 
+[dir="rtl"] .footer-sub {
+  font-size: 10px !important;
+}
+
 [dir="rtl"] .error-title {
-  font-size: 16px !important;
+  font-size: 18px !important;
 }
 
 [dir="rtl"] .error-subtitle {
-  font-size: 15px !important;
+  font-size: 14px !important;
 }
