@@ -305,10 +305,10 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 14px;
-    height: 14px;
+    width: 16px;
+    height: 16px;
     fill: currentColor;
-    font-size: 14px;
+    font-size: 16px;
   }
 
   .tab-icon :global(svg), .tab-icon :global(iconify-icon) {
@@ -395,9 +395,10 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 16px;
-    height: 16px;
+    width: 18px;
+    height: 18px;
     fill: currentColor;
+    font-size: 18px;
   }
 
   .block-icon :global(svg) {
@@ -458,8 +459,8 @@
   }
 
   .block-card-icon-circle {
-    width: 24px;
-    height: 24px;
+    width: 28px;
+    height: 28px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -467,7 +468,7 @@
     border: 1px solid rgba(255, 255, 255, 0.08);
     background: rgba(255, 255, 255, 0.02);
     color: var(--step-accent-color);
-    font-size: 12px;
+    font-size: 16px;
     flex-shrink: 0;
   }
 
@@ -555,8 +556,8 @@
   }
 
   .accordion-icon-circle {
-    width: 24px;
-    height: 24px;
+    width: 28px;
+    height: 28px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -564,7 +565,7 @@
     border: 1px solid rgba(255, 255, 255, 0.08);
     background: rgba(255, 255, 255, 0.02);
     color: var(--step-accent-color);
-    font-size: 12px;
+    font-size: 16px;
     flex-shrink: 0;
   }
 
@@ -608,13 +609,13 @@
   }
 
   .minimal-icon-circle {
-    width: 20px;
-    height: 20px;
+    width: 24px;
+    height: 24px;
     display: flex;
     align-items: center;
     justify-content: center;
     color: var(--step-accent-color);
-    font-size: 12px;
+    font-size: 14px;
     flex-shrink: 0;
   }
 

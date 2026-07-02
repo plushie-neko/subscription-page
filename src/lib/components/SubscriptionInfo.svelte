@@ -46,12 +46,12 @@
   // Status icon configuration for header blocks
   const statusConfig = $derived.by(() => {
     if (user?.userStatus === 'ACTIVE' && user.daysLeft > 3) {
-      return { color: 'green', icon: 'pixelarticons:heart' };
+      return { color: 'green', icon: 'pixelarticons:check' };
     }
     if (user?.userStatus === 'ACTIVE' && user.daysLeft > 0) {
-      return { color: 'yellow', icon: 'pixelarticons:flash' };
+      return { color: 'yellow', icon: 'pixelarticons:alert' };
     }
-    return { color: 'red', icon: 'pixelarticons:heart-broken' };
+    return { color: 'red', icon: 'pixelarticons:close' };
   });
 
   // Collapsed block toggle state
@@ -93,7 +93,9 @@
       <div class="stat-text">
         <div class="stat-label">{#if $config?.baseTranslations}{t('expires')}{:else}Expires{/if}</div>
         <div class="stat-value">{expiryDate}</div>
-        <div class="stat-sub">{expiryText}</div>
+        {#if expiryDate !== expiryText}
+          <div class="stat-sub">{expiryText}</div>
+        {/if}
       </div>
     </div>
 
@@ -211,14 +213,14 @@
   }
 
   .status-icon-circle {
-    width: 32px;
-    height: 32px;
+    width: 36px;
+    height: 36px;
     display: flex;
     align-items: center;
     justify-content: center;
     border-radius: 4px;
     border: 2px solid;
-    font-size: 16px;
+    font-size: 20px;
     flex-shrink: 0;
     box-shadow: 0 2px 0 var(--shadow-color);
   }
@@ -337,7 +339,7 @@
     position: absolute;
     top: 6px;
     right: 8px;
-    font-size: 10px;
+    font-size: 12px;
     color: var(--accent-green);
     animation: sparkle-float 2s ease-in-out infinite;
   }

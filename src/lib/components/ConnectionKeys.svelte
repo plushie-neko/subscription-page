@@ -155,7 +155,7 @@
   }
 
   .key-icon {
-    font-size: 14px;
+    font-size: 18px;
     flex-shrink: 0;
   }
 
