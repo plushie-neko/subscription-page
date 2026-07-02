@@ -22,12 +22,8 @@
   );
 
   // Bandwidth progress and display
-  const bandwidthDisplay = $derived(
-    user
-      ? !user.trafficLimit || user.trafficLimit === '0' || user.trafficLimit === '0.00 B'
-        ? `${user.trafficUsed || '0 B'} / ∞`
-        : `${user.trafficUsed || '0 B'} / ${user.trafficLimit}`
-      : ''
+  const isUnlimited = $derived(
+    !user?.trafficLimit || user?.trafficLimit === '0' || user?.trafficLimit === '0.00 B'
   );
 
   const bandwidthPercent = $derived(
@@ -104,7 +100,32 @@
       <div class="stat-icon"><iconify-icon icon="pixelarticons:chart-bar"></iconify-icon></div>
       <div class="stat-text">
         <div class="stat-label">{#if $config?.baseTranslations}{t('bandwidth')}{:else}Bandwidth{/if}</div>
-        <div class="stat-value bandwidth-val">{bandwidthDisplay}</div>
+        <div class="stat-value bandwidth-val">
+          {#if user}
+            {user.trafficUsed || '0 B'} / 
+            {#if isUnlimited}
+              <svg class="infinity-icon" viewBox="0 0 9 5" fill="currentColor" aria-label="infinity">
+                <rect x="1" y="0" width="2" height="1" />
+                <rect x="6" y="0" width="2" height="1" />
+                <rect x="0" y="1" width="1" height="1" />
+                <rect x="3" y="1" width="1" height="1" />
+                <rect x="5" y="1" width="1" height="1" />
+                <rect x="8" y="1" width="1" height="1" />
+                <rect x="0" y="2" width="1" height="1" />
+                <rect x="4" y="2" width="1" height="1" />
+                <rect x="8" y="2" width="1" height="1" />
+                <rect x="0" y="3" width="1" height="1" />
+                <rect x="3" y="3" width="1" height="1" />
+                <rect x="5" y="3" width="1" height="1" />
+                <rect x="8" y="3" width="1" height="1" />
+                <rect x="1" y="4" width="2" height="1" />
+                <rect x="6" y="4" width="2" height="1" />
+              </svg>
+            {:else}
+              {user.trafficLimit}
+            {/if}
+          {/if}
+        </div>
         <div class="bar-wrapper">
           <div class="pixel-bar-container">
             <div
@@ -350,6 +371,16 @@
 
   .bandwidth-val {
     font-size: 10px !important;
+  }
+
+  .infinity-icon {
+    display: inline-block;
+    height: 6px;
+    width: auto;
+    vertical-align: middle;
+    margin-left: 3px;
+    position: relative;
+    top: -1px;
   }
 
   .bar-wrapper {
