@@ -96,6 +96,10 @@
 		padding: 0;
 		max-width: min(400px, 90vw);
 		width: 100%;
+		margin: auto;
+		position: fixed;
+		inset: 0;
+		outline: none;
 	}
 
 	.qr-modal::backdrop {
