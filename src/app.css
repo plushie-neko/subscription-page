@@ -157,18 +157,7 @@
   --btn-pink-text: #ffffff;
 }
 
-/* Dynamic device accent color overrides */
-:root.device-accent {
-  --accent-mint: AccentColor;
-  --accent-cyan: AccentColor;
-  --accent-lavender: AccentColor;
 
-  --accent-mint-dim: color-mix(in srgb, AccentColor 15%, transparent);
-  --accent-cyan-dim: color-mix(in srgb, AccentColor 15%, transparent);
-  --accent-lavender-dim: color-mix(in srgb, AccentColor 15%, transparent);
-
-  --border-accent: color-mix(in srgb, AccentColor 30%, transparent);
-}
 
 /* ── Reset & Base ──────────────────────────── */
 *, *::before, *::after {

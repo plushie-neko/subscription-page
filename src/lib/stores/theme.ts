@@ -3,7 +3,6 @@ import { writable } from 'svelte/store';
 export type ThemeType = 'dark' | 'light';
 
 export const theme = writable<ThemeType>('dark');
-export const useDeviceAccent = writable<boolean>(false);
 
 let isInitialized = false;
 
@@ -29,10 +28,13 @@ export function initTheme() {
     }
   });
 
-  // 2. Initialize Device Accent
-  const savedAccent = localStorage.getItem('device-accent-preference') === 'true';
-  useDeviceAccent.set(savedAccent);
-  applyDeviceAccent(savedAccent);
+  // Clear legacy device-accent preference if stored
+  if (localStorage.getItem('device-accent-preference')) {
+    localStorage.removeItem('device-accent-preference');
+  }
+
+  // Ensure legacy class is removed from root
+  document.documentElement.classList.remove('device-accent');
 }
 
 export function toggleTheme() {
@@ -40,15 +42,6 @@ export function toggleTheme() {
     const next = current === 'dark' ? 'light' : 'dark';
     localStorage.setItem('theme-preference', next);
     applyTheme(next);
-    return next;
-  });
-}
-
-export function toggleDeviceAccent() {
-  useDeviceAccent.update((current) => {
-    const next = !current;
-    localStorage.setItem('device-accent-preference', String(next));
-    applyDeviceAccent(next);
     return next;
   });
 }
@@ -62,15 +55,5 @@ function applyTheme(t: ThemeType) {
   } else {
     root.classList.remove('light');
     root.style.colorScheme = 'dark';
-  }
-}
-
-function applyDeviceAccent(enabled: boolean) {
-  if (typeof document === 'undefined') return;
-  const root = document.documentElement;
-  if (enabled) {
-    root.classList.add('device-accent');
-  } else {
-    root.classList.remove('device-accent');
   }
 }
