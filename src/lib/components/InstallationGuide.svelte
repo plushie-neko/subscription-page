@@ -412,10 +412,10 @@
   }
 
   .block-desc {
-    font-size: 13px;
+    font-size: 8px;
     color: var(--text-secondary);
     margin-bottom: 12px;
-    line-height: 1.5;
+    line-height: 1.6;
   }
 
   .block-buttons {
@@ -634,13 +634,5 @@
     padding-right: 30px;
   }
 
-  :global([dir="rtl"]) .app-name,
-  :global([dir="rtl"]) .block-title,
-  :global([dir="rtl"]) .accordion-title,
-  :global([dir="rtl"]) .minimal-title {
-    font-size: 14px !important;
-  }
-  :global([dir="rtl"]) .block-desc {
-    font-size: 13.5px !important;
-  }
+
 </style>

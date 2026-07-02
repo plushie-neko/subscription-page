@@ -46,7 +46,7 @@
 	}
 
 	p {
-		font-size: 13px;
+		font-size: 8px;
 		color: var(--text-secondary);
 		line-height: 1.6;
 	}

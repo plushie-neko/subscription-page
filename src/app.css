@@ -282,7 +282,7 @@ body::after {
 /* ── Pixel Button ──────────────────────────── */
 .pixel-btn {
   font-family: var(--font-pixel);
-  font-size: 10px;
+  font-size: 8px;
   padding: 10px 16px;
   background: var(--bg-elevated);
   color: var(--text-primary);
@@ -339,7 +339,7 @@ body::after {
 /* ── Pixel Tab ─────────────────────────────── */
 .pixel-tab {
   font-family: var(--font-pixel);
-  font-size: 9px;
+  font-size: 8px;
   padding: 8px 14px;
   background: var(--bg-card);
   color: var(--text-secondary);
@@ -523,7 +523,7 @@ body::after {
 /* ── Pixel Section Title ───────────────────── */
 .section-title {
   font-family: var(--font-pixel);
-  font-size: 12px;
+  font-size: 8px;
   color: var(--accent-mint);
   display: flex;
   align-items: center;
@@ -534,7 +534,7 @@ body::after {
 .section-title::before {
   content: '▸';
   color: var(--accent-pink);
-  font-size: 14px;
+  font-size: 10px;
   animation: pixel-blink 1.2s step-end infinite;
 }
 
@@ -683,82 +683,4 @@ body::after {
   }
 }
 
-/* ── RTL Farsi Font Size Scaling Overrides ── */
-[dir="rtl"] .brand-name {
-  font-size: 20px !important;
-}
 
-[dir="rtl"] .section-title {
-  font-size: 16px !important;
-}
-
-[dir="rtl"] .pixel-btn {
-  font-size: 15px !important;
-  padding: 12px 20px !important;
-}
-
-[dir="rtl"] .pixel-tab,
-[dir="rtl"] .app-btn,
-[dir="rtl"] .key-count {
-  font-size: 14px !important;
-}
-
-[dir="rtl"] .stat-card .stat-icon {
-  font-size: 24px !important;
-}
-
-[dir="rtl"] .stat-card .stat-label {
-  font-size: 11px !important;
-}
-
-[dir="rtl"] .stat-card .stat-value,
-[dir="rtl"] .bandwidth-val {
-  font-size: 16px !important;
-}
-
-[dir="rtl"] .stat-sub {
-  font-size: 11px !important;
-}
-
-[dir="rtl"] .block-title {
-  font-size: 16px !important;
-}
-
-[dir="rtl"] .block-desc,
-[dir="rtl"] .step-text {
-  font-size: 14.5px !important;
-  line-height: 1.6 !important;
-}
-
-[dir="rtl"] .step-number {
-  font-size: 13px !important;
-}
-
-[dir="rtl"] .key-name {
-  font-size: 14px !important;
-}
-
-[dir="rtl"] .qr-title {
-  font-size: 15px !important;
-}
-
-[dir="rtl"] .qr-hint {
-  font-size: 12px !important;
-  line-height: 1.6 !important;
-}
-
-[dir="rtl"] .footer-text {
-  font-size: 11px !important;
-}
-
-[dir="rtl"] .footer-sub {
-  font-size: 10px !important;
-}
-
-[dir="rtl"] .error-title {
-  font-size: 18px !important;
-}
-
-[dir="rtl"] .error-subtitle {
-  font-size: 14px !important;
-}

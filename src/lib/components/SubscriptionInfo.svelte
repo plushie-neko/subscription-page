@@ -261,7 +261,7 @@
   }
 
   .header-desc {
-    font-size: 12px;
+    font-size: 8px;
     color: var(--text-secondary);
     white-space: nowrap;
     overflow: hidden;
@@ -357,11 +357,5 @@
     width: 100%;
   }
 
-  /* RTL overrides for fonts */
-  :global([dir="rtl"]) .header-name {
-    font-size: 14px !important;
-  }
-  :global([dir="rtl"]) .header-desc {
-    font-size: 13.5px !important;
-  }
+
 </style>
