@@ -3,36 +3,83 @@
  */
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime.js';
+
+// Import locales for dayjs
 import 'dayjs/locale/ru.js';
+import 'dayjs/locale/zh.js';
+import 'dayjs/locale/fr.js';
+import 'dayjs/locale/fa.js';
+import 'dayjs/locale/uz.js';
+import 'dayjs/locale/de.js';
+import 'dayjs/locale/hi.js';
+import 'dayjs/locale/tr.js';
+import 'dayjs/locale/az.js';
+import 'dayjs/locale/es.js';
+import 'dayjs/locale/vi.js';
+import 'dayjs/locale/ja.js';
+import 'dayjs/locale/be.js';
+import 'dayjs/locale/uk.js';
+import 'dayjs/locale/pt.js';
+import 'dayjs/locale/pl.js';
+import 'dayjs/locale/id.js';
+import 'dayjs/locale/tk.js';
+import 'dayjs/locale/th.js';
 
 dayjs.extend(relativeTime);
 
-export function formatDate(
-	dateStr: string | null,
-	lang: string,
-	translations: Record<string, string>
+export function getLocalizedText(
+	textObj: Record<string, string> | undefined,
+	lang: string
 ): string {
-	if (!dateStr) return translations['neverExpires'] ?? 'Never';
-	const d = dayjs(dateStr);
-	if (!d.isValid()) return translations['neverExpires'] ?? 'Never';
-	return d.locale(lang === 'ru' ? 'ru' : 'en').format('DD MMM YYYY');
+	if (!textObj) return '';
+	return textObj[lang] ?? textObj['en'] ?? Object.values(textObj)[0] ?? '';
 }
 
 export function getExpirationText(
-	dateStr: string | null,
-	lang: string,
-	translations: Record<string, string>
+	expireAt: string | null | undefined,
+	currentLang: string,
+	baseTranslations: Record<string, Record<string, string>>
 ): string {
-	if (!dateStr) return translations['neverExpires'] ?? 'Never expires';
-	const d = dayjs(dateStr);
-	if (!d.isValid()) return translations['neverExpires'] ?? 'Never expires';
+	if (!expireAt) {
+		return getLocalizedText(baseTranslations.unknown, currentLang);
+	}
 
+	const expiration = dayjs(expireAt).locale(currentLang);
 	const now = dayjs();
-	if (d.isBefore(now)) return translations['expired'] ?? 'Expired';
 
-	const daysLeft = d.diff(now, 'day');
-	const template = translations['daysLeft'] ?? '{days} days left';
-	return template.replace('{days}', String(daysLeft));
+	if (expiration.isBefore(now)) {
+		return `${getLocalizedText(baseTranslations.expired, currentLang)} ${expiration.fromNow(false)}`;
+	}
+
+	if (expiration.year() === 2099) {
+		return getLocalizedText(baseTranslations.indefinitely, currentLang);
+	}
+
+	return `${getLocalizedText(baseTranslations.expiresIn, currentLang)} ${expiration.fromNow(false)}`;
+}
+
+export function formatDate(
+	dateStr: string | null | undefined,
+	currentLang: string,
+	baseTranslations: Record<string, Record<string, string>>
+): string {
+	if (!dateStr) {
+		return getLocalizedText(baseTranslations.unknown, currentLang);
+	}
+	const d = dayjs(dateStr);
+	if (d.year() === 2099) {
+		return getLocalizedText(baseTranslations.indefinitely, currentLang);
+	}
+	if (currentLang === 'fa') {
+		return Intl.DateTimeFormat('fa-IR', {
+			year: 'numeric',
+			month: 'short',
+			day: '2-digit',
+			hour: undefined,
+			minute: undefined
+		}).format(new Date(dateStr));
+	}
+	return dayjs(dateStr).locale(currentLang).format('DD MMMM, YYYY');
 }
 
 export function constructSubscriptionUrl(currentHref: string, shortUuid: string): string {
@@ -40,7 +87,6 @@ export function constructSubscriptionUrl(currentHref: string, shortUuid: string)
 		const url = new URL(currentHref);
 		// Remove trailing segments and rebuild with shortUuid
 		const pathParts = url.pathname.split('/').filter(Boolean);
-		// Replace the last segment (which is the current shortUuid route) or append
 		if (pathParts.length > 0) {
 			pathParts[pathParts.length - 1] = shortUuid;
 		} else {
@@ -89,7 +135,7 @@ export function parseLinkName(link: string): { name: string; fullLink: string } 
  * Bandwidth progress as 0-1 ratio.
  */
 export function bandwidthProgress(used: string, limit: string): number {
-	if (limit === '0') return 0; // unlimited
+	if (limit === '0' || limit === '0.00 B' || !limit) return 0; // unlimited
 	const usedNum = parseFloat(used);
 	const limitNum = parseFloat(limit);
 	if (isNaN(usedNum) || isNaN(limitNum) || limitNum === 0) return 0;

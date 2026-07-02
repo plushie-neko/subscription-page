@@ -3,10 +3,10 @@
  * Mirrors the Zustand stores from the original React app.
  */
 import { writable, derived } from 'svelte/store';
-import type { SubscriptionUser, SubpageConfig } from '$lib/types';
+import type { SubscriptionInfo, SubpageConfig } from '$lib/types';
 
 // ── Subscription Info ──
-export const subscription = writable<SubscriptionUser | null>(null);
+export const subscription = writable<SubscriptionInfo | null>(null);
 
 // ── App Config ──
 export const config = writable<SubpageConfig | null>(null);
@@ -22,7 +22,12 @@ export const translations = derived(
 	[config, currentLang],
 	([$config, $lang]) => {
 		if (!$config) return {};
-		return $config.translations[$lang] ?? $config.translations['en'] ?? {};
+		const base = $config.baseTranslations;
+		const flat: Record<string, string> = {};
+		for (const [key, map] of Object.entries(base)) {
+			flat[key] = map[$lang] ?? map['en'] ?? Object.values(map)[0] ?? '';
+		}
+		return flat;
 	}
 );
 

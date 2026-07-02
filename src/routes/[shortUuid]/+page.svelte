@@ -31,11 +31,11 @@
 	});
 
 	// Reactive translator
-	let t = $derived(createTranslator($currentLang, $config?.translations));
+	let t = $derived(createTranslator($currentLang, $config?.baseTranslations));
 
 	let subscriptionUrl = $derived(
 		$subscription
-			? constructSubscriptionUrl(typeof window !== 'undefined' ? window.location.href : '', $subscription.shortUuid)
+			? constructSubscriptionUrl(typeof window !== 'undefined' ? window.location.href : '', $subscription.user.shortUuid)
 			: ''
 	);
 
@@ -115,13 +115,13 @@
 			<div class="container">
 				<div class="content-stack">
 					<!-- Subscription Info Card -->
-					<SubscriptionCard user={$subscription} {t} />
+					<SubscriptionCard user={$subscription.user} {t} />
 
 					<!-- Installation Guide -->
 					<InstallationGuide
 						config={$config}
 						{subscriptionUrl}
-						username={$subscription.username}
+						username={$subscription.user.username}
 						{t}
 					/>
 

@@ -6,6 +6,8 @@
 	import type { SubscriptionUser } from '$lib/types';
 	import InfoChip from './InfoChip.svelte';
 	import { User, Check, X, Calendar, ArrowUpDown, Activity } from '@lucide/svelte';
+	import { getExpirationText } from '$lib/utils/format';
+	import { currentLang, config } from '$lib/stores/subscription';
 
 	interface Props {
 		user: SubscriptionUser;
@@ -15,12 +17,16 @@
 	let { user, t }: Props = $props();
 
 	let isActive = $derived(user.userStatus === 'ACTIVE');
-	let statusText = $derived(isActive ? t('active') : t('inactive'));
+	let statusText = $derived(
+		$config?.baseTranslations
+			? (isActive ? t($config.baseTranslations.active) : t($config.baseTranslations.inactive))
+			: (isActive ? 'Active' : 'Inactive')
+	);
 	let statusColor = $derived(isActive ? 'success' as const : 'danger' as const);
 
 	let bandwidthValue = $derived(
 		!user.trafficLimit || user.trafficLimit === '0' || user.trafficLimit === '0.00 B'
-			? `${user.trafficUsed || '0 B'} / ${t('unlimited')}`
+			? `${user.trafficUsed || '0 B'} / ∞`
 			: `${user.trafficUsed || '0 B'} / ${user.trafficLimit}`
 	);
 
@@ -36,17 +42,12 @@
 	let ringCircumference = 2 * Math.PI * 42;
 	let ringOffset = $derived(ringCircumference - progress() * ringCircumference);
 
-	function formatExpiry(dateStr: string | null): string {
-		if (!dateStr) return t('neverExpires');
-		const d = new Date(dateStr);
-		if (isNaN(d.getTime())) return t('neverExpires');
-		const now = new Date();
-		const diff = d.getTime() - now.getTime();
-		if (diff < 0) return t('expired');
-		const days = Math.ceil(diff / (1000 * 60 * 60 * 24));
-		const tmpl = t('daysLeft');
-		return tmpl.replace('{days}', String(days));
-	}
+	// Reactive relative expiration text
+	let expirationText = $derived(
+		$config?.baseTranslations
+			? getExpirationText(user.expiresAt, $currentLang, $config.baseTranslations)
+			: 'Unknown'
+	);
 </script>
 
 <div class="subscription-card animate-in stagger-1">
@@ -62,8 +63,8 @@
 			</div>
 			<div class="user-details">
 				<h2 class="username">{user.username || user.shortUuid || 'User'}</h2>
-				<span class="expiry-text" class:expired={user.daysLeft <= 0}>
-					{formatExpiry(user.expiresAt)}
+				<span class="expiry-text" class:expired={user.userStatus === 'EXPIRED' || user.daysLeft <= 0}>
+					{expirationText}
 				</span>
 			</div>
 		</div>
@@ -97,21 +98,21 @@
 
 	<!-- Info chips grid -->
 	<div class="chips-grid">
-		<InfoChip label={t('name')} value={user.username || user.shortUuid || 'User'} color="primary">
+		<InfoChip label={$config?.baseTranslations ? t($config.baseTranslations.name) : 'Username'} value={user.username || user.shortUuid || 'User'} color="primary">
 			{#snippet icon()}<User size={16} />{/snippet}
 		</InfoChip>
 
-		<InfoChip label={t('status')} value={statusText} color={statusColor}>
+		<InfoChip label={$config?.baseTranslations ? t($config.baseTranslations.status) : 'Status'} value={statusText} color={statusColor}>
 			{#snippet icon()}
 				{#if isActive}<Check size={16} />{:else}<X size={16} />{/if}
 			{/snippet}
 		</InfoChip>
 
-		<InfoChip label={t('expires')} value={formatExpiry(user.expiresAt)} color="warning">
+		<InfoChip label={$config?.baseTranslations ? t($config.baseTranslations.expires) : 'Expires'} value={expirationText} color="warning">
 			{#snippet icon()}<Calendar size={16} />{/snippet}
 		</InfoChip>
 
-		<InfoChip label={t('bandwidth')} value={bandwidthValue} color="info">
+		<InfoChip label={$config?.baseTranslations ? t($config.baseTranslations.bandwidth) : 'Bandwidth'} value={bandwidthValue} color="info">
 			{#snippet icon()}<ArrowUpDown size={16} />{/snippet}
 		</InfoChip>
 	</div>

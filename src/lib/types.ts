@@ -4,20 +4,31 @@
  */
 
 export interface SubscriptionUser {
-	username: string;
 	shortUuid: string;
-	userStatus: 'ACTIVE' | 'DISABLED' | 'LIMITED' | 'EXPIRED';
-	expiresAt: string | null;
 	daysLeft: number;
 	trafficUsed: string;
 	trafficLimit: string;
-	onlineAt: string | null;
+	lifetimeTrafficUsed?: string;
+	trafficUsedBytes?: number;
+	trafficLimitBytes?: number;
+	lifetimeTrafficUsedBytes?: number;
+	username: string;
+	expiresAt: string | null;
+	isActive: boolean;
+	userStatus: 'ACTIVE' | 'DISABLED' | 'LIMITED' | 'EXPIRED';
+	trafficLimitStrategy?: string;
+}
+
+export interface SubscriptionInfo {
+	isFound: boolean;
+	user: SubscriptionUser;
 	links: string[];
 	ssConfLinks: Record<string, string>;
+	subscriptionUrl?: string;
 }
 
 export interface SubscriptionData {
-	response: SubscriptionUser;
+	response: SubscriptionInfo;
 }
 
 export interface PlatformAppButton {
@@ -28,11 +39,10 @@ export interface PlatformAppButton {
 }
 
 export interface PlatformAppBlock {
+	svgIconKey: string;
+	svgIconColor: string;
 	title: Record<string, string>;
 	description: Record<string, string>;
-	steps: Array<{
-		text: Record<string, string>;
-	}>;
 	buttons: PlatformAppButton[];
 }
 
@@ -70,11 +80,12 @@ export interface UIConfig {
 }
 
 export interface SubpageConfig {
+	version: string | number;
 	baseSettings: BaseSettings;
 	brandingSettings: BrandingSettings;
 	uiConfig: UIConfig;
 	platforms: Partial<Record<PlatformKey, PlatformConfig>>;
 	locales: string[];
 	svgLibrary: Record<string, string>;
-	translations: Record<string, Record<string, string>>;
+	baseTranslations: Record<string, Record<string, string>>;
 }
