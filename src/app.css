@@ -4,6 +4,14 @@
 
 @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Inter:wght@400;500;600;700&family=Vazirmatn:wght@400;500;600;700;800&display=swap');
 
+@font-face {
+  font-family: 'Erfan';
+  src: url('/erfan.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
 /* ── Color Palette ─────────────────────────── */
 :root {
   /* Backgrounds */
@@ -85,8 +93,8 @@
 
 /* RTL / Farsi Typography Overrides */
 :root[dir="rtl"] {
-  --font-pixel: 'Vazirmatn', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
-  --font-body: 'Vazirmatn', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-pixel: 'Erfan', 'Vazirmatn', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-body: 'Erfan', 'Vazirmatn', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
 :root.light {
