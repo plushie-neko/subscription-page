@@ -42,10 +42,13 @@ export const load: PageServerLoad = async ({ params, request, cookies, getClient
 			requestHeaders
 		);
 
-		if (!webpageAllowed || !subpageConfig) {
-			console.warn(`Webpage access is not allowed or config not found for shortUuid: ${shortUuid}`);
-			return { error: 'Access denied or config not found', status: 403 };
+		if (!webpageAllowed) {
+			console.warn(`Webpage access is not allowed for shortUuid: ${shortUuid}`);
+			return { error: 'Access denied', status: 403 };
 		}
+
+		// Use panel config or fallback to MOCK_CONFIG if no configs exist on the panel
+		const resolvedConfig = subpageConfig || MOCK_CONFIG;
 
 		// 2. Fetch subscription info
 		const subscriptionData = await getSubscriptionInfo(clientIp, shortUuid);
@@ -56,7 +59,7 @@ export const load: PageServerLoad = async ({ params, request, cookies, getClient
 		const subscriptionInfo = subscriptionData.response;
 
 		// 3. Clear/remove connection keys if not allowed in baseSettings
-		if (!subpageConfig.baseSettings.showConnectionKeys) {
+		if (!resolvedConfig.baseSettings.showConnectionKeys) {
 			subscriptionInfo.links = [];
 			subscriptionInfo.ssConfLinks = {};
 		}
@@ -64,7 +67,7 @@ export const load: PageServerLoad = async ({ params, request, cookies, getClient
 		// 4. Set secure session cookie with JWT
 		// Get configUuid from subpageConfig if available to store in JWT payload
 		// This matches the NestJS backend logic
-		const sessionToken = signSessionToken(subpageConfig.baseSettings ? config.SUBPAGE_CONFIG_UUID : null);
+		const sessionToken = signSessionToken(subpageConfig?.baseSettings ? config.SUBPAGE_CONFIG_UUID : null);
 		cookies.set('session', sessionToken, {
 			path: '/',
 			httpOnly: true,
@@ -75,7 +78,7 @@ export const load: PageServerLoad = async ({ params, request, cookies, getClient
 
 		return {
 			subscription: subscriptionInfo,
-			config: subpageConfig,
+			config: resolvedConfig,
 			shortUuid
 		};
 	} catch (err) {

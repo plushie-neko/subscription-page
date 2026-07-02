@@ -156,25 +156,6 @@ export async function getSubscriptionInfo(clientIp: string, shortUuid: string): 
 }
 
 /**
- * Fetch list of all subpage configurations
- */
-export async function getSubpageConfigList(): Promise<{ uuid: string }[]> {
-	const config = getAppConfig();
-	if (!config.REMNAWAVE_PANEL_URL || !config.REMNAWAVE_API_TOKEN) {
-		return [];
-	}
-
-	try {
-		const client = getAxiosClient();
-		const response = await client.get('/api/subscription-page/config/list');
-		return response.data?.response?.configs || [];
-	} catch (e) {
-		console.error('Error fetching subpage config list:', e);
-		return [];
-	}
-}
-
-/**
  * Fetch subpage config by UUID
  */
 export async function getSubpageConfigByUuid(uuid: string): Promise<SubpageConfig | null> {
@@ -183,41 +164,22 @@ export async function getSubpageConfigByUuid(uuid: string): Promise<SubpageConfi
 		return null;
 	}
 
-	// Resolve dynamic default UUID fallback
-	let targetUuid = uuid;
-	if (uuid === '00000000-0000-0000-0000-000000000000' || uuid === 'default') {
-		const configList = await getSubpageConfigList();
-		if (configList.length > 0) {
-			targetUuid = configList[0].uuid;
-			console.log(`Resolved default subpage UUID to active config: ${targetUuid}`);
-		} else {
-			console.error('No subpage configurations found on the panel.');
-			return null;
-		}
-	}
-
-	const cached = getFromCache(targetUuid, configCache);
+	const cached = getFromCache(uuid, configCache);
 	if (cached) return cached;
 
 	try {
 		const client = getAxiosClient();
-		const response = await client.get(`/api/subscription-page/config/${encodeURIComponent(targetUuid)}`);
+		const response = await client.get(`/api/subscription-page/config/${encodeURIComponent(uuid)}`);
 		const subpageConfig = response.data?.response?.config || null;
 		
 		if (subpageConfig) {
-			setToCache(targetUuid, subpageConfig, configCache);
+			setToCache(uuid, subpageConfig, configCache);
 		}
 		return subpageConfig;
 	} catch (e: any) {
-		// Fallback to first available config on 404
-		if (e?.response?.status === 404 && targetUuid !== '00000000-0000-0000-0000-000000000000') {
-			console.warn(`Config UUID ${targetUuid} not found on panel. Attempting fallback to first config in list.`);
-			const configList = await getSubpageConfigList();
-			if (configList.length > 0 && configList[0].uuid !== targetUuid) {
-				return await getSubpageConfigByUuid(configList[0].uuid);
-			}
+		if (e?.response?.status !== 404) {
+			console.error(`Error fetching subpage config ${uuid}:`, e?.message || e);
 		}
-		console.error(`Error fetching subpage config ${targetUuid}:`, e?.message || e);
 		return null;
 	}
 }
@@ -247,14 +209,20 @@ export async function getSubpageConfigByShortUuid(
 			});
 		}
 
-		// Perform GET request with body containing client headers (required by backend contract schema)
-		const response = await client.request({
-			method: 'GET',
-			url: `/api/subscriptions/subpage-config/${encodeURIComponent(shortUuid)}`,
-			data: {
+		let response;
+		try {
+			// Perform POST request with body containing client headers
+			response = await client.post(`/api/subscriptions/subpage-config/${encodeURIComponent(shortUuid)}`, {
 				requestHeaders: reqHeadersRecord
+			});
+		} catch (e: any) {
+			// If POST is not supported or fails, fallback to GET (some setups vary)
+			if (e?.response?.status === 405 || e?.response?.status === 404 || e?.response?.status >= 500 || e?.response?.status === 400) {
+				response = await client.get(`/api/subscriptions/subpage-config/${encodeURIComponent(shortUuid)}`);
+			} else {
+				throw e;
 			}
-		});
+		}
 
 		const result = response.data?.response;
 		if (!result) {
