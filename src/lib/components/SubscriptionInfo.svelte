@@ -104,25 +104,25 @@
           {#if user}
             {user.trafficUsed || '0 B'} / 
             {#if isUnlimited}
-              <svg class="infinity-icon" viewBox="0 0 11 6" fill="currentColor" aria-label="infinity">
-                <rect x="1" y="0" width="3" height="1" />
-                <rect x="7" y="0" width="3" height="1" />
+              <svg class="infinity-icon" viewBox="0 0 13 6" fill="currentColor" aria-label="infinity">
+                <rect x="1" y="0" width="4" height="1" />
+                <rect x="8" y="0" width="4" height="1" />
                 <rect x="0" y="1" width="2" height="1" />
-                <rect x="3" y="1" width="2" height="1" />
-                <rect x="6" y="1" width="2" height="1" />
-                <rect x="9" y="1" width="2" height="1" />
+                <rect x="4" y="1" width="2" height="1" />
+                <rect x="7" y="1" width="2" height="1" />
+                <rect x="11" y="1" width="2" height="1" />
                 <rect x="0" y="2" width="2" height="1" />
-                <rect x="4" y="2" width="3" height="1" />
-                <rect x="9" y="2" width="2" height="1" />
+                <rect x="5" y="2" width="3" height="1" />
+                <rect x="11" y="2" width="2" height="1" />
                 <rect x="0" y="3" width="2" height="1" />
-                <rect x="4" y="3" width="3" height="1" />
-                <rect x="9" y="3" width="2" height="1" />
+                <rect x="5" y="3" width="3" height="1" />
+                <rect x="11" y="3" width="2" height="1" />
                 <rect x="0" y="4" width="2" height="1" />
-                <rect x="3" y="4" width="2" height="1" />
-                <rect x="6" y="4" width="2" height="1" />
-                <rect x="9" y="4" width="2" height="1" />
-                <rect x="1" y="5" width="3" height="1" />
-                <rect x="7" y="5" width="3" height="1" />
+                <rect x="4" y="4" width="2" height="1" />
+                <rect x="7" y="4" width="2" height="1" />
+                <rect x="11" y="4" width="2" height="1" />
+                <rect x="1" y="5" width="4" height="1" />
+                <rect x="8" y="5" width="4" height="1" />
               </svg>
             {:else}
               {user.trafficLimit}
