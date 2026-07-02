@@ -13,7 +13,6 @@
       ? (isActive ? t($config.baseTranslations.active) : t($config.baseTranslations.inactive))
       : (isActive ? 'Active' : 'Inactive')
   );
-  const statusEmoji = $derived(isActive ? '💚' : '💔');
 
   const expiryText = $derived(
     user && $config?.baseTranslations ? getExpirationText(user.expiresAt, $currentLang, $config.baseTranslations) : ''
@@ -49,7 +48,7 @@
     <div class="stats-grid">
       <!-- Username -->
       <div class="stat-card mint">
-        <div class="stat-icon">👤</div>
+        <div class="stat-icon"><iconify-icon icon="pixelarticons:user"></iconify-icon></div>
         <div class="stat-text">
           <div class="stat-label">{#if $config?.baseTranslations}{t('name')}{:else}Name{/if}</div>
           <div class="stat-value">{user.username || user.shortUuid}</div>
@@ -58,7 +57,9 @@
 
       <!-- Status -->
       <div class="stat-card" class:green={isActive} class:red={!isActive}>
-        <div class="stat-icon">{statusEmoji}</div>
+        <div class="stat-icon">
+          <iconify-icon icon={isActive ? 'pixelarticons:heart' : 'pixelarticons:heart-broken'}></iconify-icon>
+        </div>
         <div class="stat-text">
           <div class="stat-label">{#if $config?.baseTranslations}{t('status')}{:else}Status{/if}</div>
           <div class="stat-value" class:active-glow={isActive}>
@@ -66,13 +67,15 @@
           </div>
         </div>
         {#if isActive}
-          <div class="status-sparkle">✦</div>
+          <div class="status-sparkle">
+            <iconify-icon icon="pixelarticons:flash"></iconify-icon>
+          </div>
         {/if}
       </div>
 
       <!-- Expires -->
       <div class="stat-card peach">
-        <div class="stat-icon">📅</div>
+        <div class="stat-icon"><iconify-icon icon="pixelarticons:calendar"></iconify-icon></div>
         <div class="stat-text">
           <div class="stat-label">{#if $config?.baseTranslations}{t('expires')}{:else}Expires{/if}</div>
           <div class="stat-value">{expiryDate}</div>
@@ -82,7 +85,7 @@
 
       <!-- Bandwidth -->
       <div class="stat-card cyan bandwidth-card">
-        <div class="stat-icon">📊</div>
+        <div class="stat-icon"><iconify-icon icon="pixelarticons:chart-bar"></iconify-icon></div>
         <div class="stat-text">
           <div class="stat-label">{#if $config?.baseTranslations}{t('bandwidth')}{:else}Bandwidth{/if}</div>
           <div class="stat-value bandwidth-val">{bandwidthDisplay}</div>

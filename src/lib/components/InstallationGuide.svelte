@@ -6,14 +6,14 @@
   import { constructSubscriptionUrl, formatTemplate } from '$lib/utils/format';
   import type { PlatformKey, PlatformAppBlock, PlatformAppButton } from '$lib/types';
 
-  const platformEmojis: Record<string, string> = {
-    ios: '🍎',
-    android: '🤖',
-    windows: '🪟',
-    macos: '💻',
-    linux: '🐧',
-    androidTV: '📺',
-    appleTV: '📺'
+  const platformFallbackIcons: Record<string, string> = {
+    ios: 'pixelarticons:device-phone',
+    android: 'pixelarticons:device-phone',
+    windows: 'pixelarticons:device-laptop',
+    macos: 'pixelarticons:device-laptop',
+    linux: 'pixelarticons:device-laptop',
+    androidTV: 'pixelarticons:device-tv',
+    appleTV: 'pixelarticons:device-tv'
   };
 
   let selectedPlatformKey = $state<string | null>(null);
@@ -90,7 +90,11 @@
             class:active={selectedPlatformKey === plat.key}
             onclick={() => selectPlatform(plat.key)}
           >
-            <span class="tab-emoji">{platformEmojis[plat.key] ?? '📱'}</span>
+            {#if $config?.svgLibrary && $config.svgLibrary[plat.svgIconKey]}
+              <span class="tab-icon">{@html $config.svgLibrary[plat.svgIconKey]}</span>
+            {:else}
+              <span class="tab-icon"><iconify-icon icon={platformFallbackIcons[plat.key] ?? 'pixelarticons:device-phone'}></iconify-icon></span>
+            {/if}
             <span class="tab-label">{t(plat.displayName)}</span>
           </button>
         {/each}
@@ -107,7 +111,7 @@
               onclick={() => selectApp(i)}
             >
               {#if app.featured}
-                <span class="featured-star">⭐</span>
+                <span class="featured-star"><iconify-icon icon="pixelarticons:star"></iconify-icon></span>
               {/if}
               <span class="app-name">{app.name}</span>
             </button>
@@ -144,7 +148,7 @@
                       onclick={() => handleButton(btn, btnId)}
                     >
                       {#if copied === btnId}
-                        ✅ {#if $config?.baseTranslations}{t({ en: 'Copied', ru: 'Скопировано' })}{:else}Copied!{/if}
+                        <iconify-icon icon="pixelarticons:check" style="margin-right: 4px; vertical-align: middle;"></iconify-icon> {#if $config?.baseTranslations}{t({ en: 'Copied', ru: 'Скопировано' })}{:else}Copied!{/if}
                       {:else}
                         {#if $config?.svgLibrary && $config.svgLibrary[btn.svgIconKey]}
                           <span class="btn-svg">{@html $config.svgLibrary[btn.svgIconKey]}</span>
@@ -171,8 +175,19 @@
     margin-bottom: 16px;
   }
 
-  .tab-emoji {
+  .tab-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 14px;
+    height: 14px;
+    fill: currentColor;
     font-size: 14px;
+  }
+
+  .tab-icon :global(svg), .tab-icon :global(iconify-icon) {
+    width: 100%;
+    height: 100%;
   }
 
   .tab-label {
@@ -229,6 +244,8 @@
     position: absolute;
     top: -4px;
     right: -4px;
+    color: var(--accent-yellow);
+    display: inline-flex;
   }
 
   .app-name {

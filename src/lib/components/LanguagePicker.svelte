@@ -4,19 +4,19 @@
   const locales = $derived($config?.locales ?? []);
   
   const localeNames: Record<string, string> = {
-    en: '🇬🇧 EN',
-    ru: '🇷🇺 RU',
-    zh: '🇨🇳 ZH',
-    ja: '🇯🇵 JA',
-    ko: '🇰🇷 KO',
-    de: '🇩🇪 DE',
-    fr: '🇫🇷 FR',
-    es: '🇪🇸 ES',
-    pt: '🇧🇷 PT',
-    tr: '🇹🇷 TR',
-    uk: '🇺🇦 UK',
-    fa: '🇮🇷 FA',
-    ar: '🇸🇦 AR'
+    en: 'EN',
+    ru: 'RU',
+    zh: 'ZH',
+    ja: 'JA',
+    ko: 'KO',
+    de: 'DE',
+    fr: 'FR',
+    es: 'ES',
+    pt: 'PT',
+    tr: 'TR',
+    uk: 'UK',
+    fa: 'FA',
+    ar: 'AR'
   };
 
   function getLocaleName(code: string): string {

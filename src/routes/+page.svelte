@@ -1,6 +1,9 @@
 <div class="landing">
 	<div class="pixel-card landing-card">
-		<h1 class="landing-icon">🐱✨</h1>
+		<h1 class="landing-icon">
+			<iconify-icon icon="pixelarticons:cat" style="color: var(--accent-mint);"></iconify-icon>
+			<iconify-icon icon="pixelarticons:flash" style="color: var(--accent-yellow);"></iconify-icon>
+		</h1>
 		<h2>Subscription Portal</h2>
 		<p>Please use your personal subscription link to access your portal, nya~</p>
 	</div>
@@ -28,6 +31,10 @@
 		font-size: 3rem;
 		margin-bottom: 16px;
 		animation: pixel-bounce 1.2s ease-in-out infinite;
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		gap: 12px;
 	}
 
 	h2 {

@@ -37,9 +37,9 @@
   }
 
   function getSupportIcon(url: string): string {
-    if (url.includes('t.me')) return '💬';
-    if (url.includes('discord')) return '🎮';
-    return '💭';
+    if (url.includes('t.me')) return 'pixelarticons:message-text';
+    if (url.includes('discord')) return 'pixelarticons:gamepad';
+    return 'pixelarticons:comment';
   }
 
   const qrSvg = $derived(
@@ -55,7 +55,7 @@
 <header class="header">
   <div class="header-inner container">
     <div class="brand">
-      <div class="logo-icon">🐱</div>
+      <div class="logo-icon"><iconify-icon icon="pixelarticons:cat"></iconify-icon></div>
       <span class="brand-name">{brandName}</span>
     </div>
 
@@ -67,7 +67,7 @@
         onclick={toggleDeviceAccent} 
         title="Match Device Accent Color"
       >
-        🎨
+        <iconify-icon icon="pixelarticons:paint-bucket"></iconify-icon>
       </button>
 
       <!-- Theme Toggle -->
@@ -76,18 +76,18 @@
         onclick={toggleTheme} 
         title="Toggle Theme"
       >
-        {$theme === 'dark' ? '☀️' : '🌙'}
+        <iconify-icon icon={$theme === 'dark' ? 'pixelarticons:sun' : 'pixelarticons:moon'}></iconify-icon>
       </button>
 
       {#if !hideGetLink}
         <button class="icon-btn header-btn" onclick={handleGetLink} title="Get subscription link">
-          🔗
+          <iconify-icon icon="pixelarticons:link"></iconify-icon>
         </button>
       {/if}
 
       {#if supportUrl}
         <a class="icon-btn header-btn" href={supportUrl} target="_blank" rel="noopener noreferrer" title="Support">
-          {getSupportIcon(supportUrl)}
+          <iconify-icon icon={getSupportIcon(supportUrl)}></iconify-icon>
         </a>
       {/if}
     </div>
@@ -100,8 +100,13 @@
   <div class="modal-overlay" onclick={closeModal}>
     <div class="modal-content" onclick={(e) => e.stopPropagation()}>
       <div class="modal-header-row">
-        <h3 class="modal-title">✨ {#if $config?.baseTranslations}{t('getLink')}{:else}Subscription Link{/if}</h3>
-        <button class="close-btn" onclick={closeModal}>✕</button>
+        <h3 class="modal-title">
+          <iconify-icon icon="pixelarticons:flash" style="color: var(--accent-yellow); margin-right: 4px; vertical-align: middle;"></iconify-icon>
+          {#if $config?.baseTranslations}{t('getLink')}{:else}Subscription Link{/if}
+        </h3>
+        <button class="close-btn" onclick={closeModal}>
+          <iconify-icon icon="pixelarticons:close"></iconify-icon>
+        </button>
       </div>
 
       {#if qrSvg}
@@ -116,9 +121,11 @@
 
       <button class="pixel-btn primary copy-link-btn" onclick={handleCopy}>
         {#if copySuccess}
-          ✅ {#if $config?.baseTranslations}{t('linkCopied')}{:else}Copied!{/if}
+          <iconify-icon icon="pixelarticons:check" style="margin-right: 4px; vertical-align: middle;"></iconify-icon>
+          {#if $config?.baseTranslations}{t('linkCopied')}{:else}Copied!{/if}
         {:else}
-          📋 {#if $config?.baseTranslations}{t('copyLink')}{:else}Copy Link{/if}
+          <iconify-icon icon="pixelarticons:clipboard" style="margin-right: 4px; vertical-align: middle;"></iconify-icon>
+          {#if $config?.baseTranslations}{t('copyLink')}{:else}Copy Link{/if}
         {/if}
       </button>
     </div>
@@ -167,16 +174,35 @@
     letter-spacing: 1px;
   }
 
+  .logo-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--accent-mint);
+    filter: drop-shadow(0 0 6px rgba(126, 252, 202, 0.3));
+    animation: pixel-bounce 1s ease-in-out infinite;
+  }
+
+  .logo-icon :global(iconify-icon) {
+    font-size: 24px;
+  }
+
   .header-actions {
     display: flex;
     gap: 8px;
   }
 
   .header-btn {
-    font-size: 16px;
     width: 38px;
     height: 38px;
     text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .header-btn :global(iconify-icon) {
+    font-size: 18px;
   }
 
   /* Modal */

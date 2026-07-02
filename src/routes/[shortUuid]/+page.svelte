@@ -53,7 +53,10 @@
 {:else if hasError}
   <main class="container main-content error-container">
     <div class="pixel-card error-card">
-      <div class="error-emoji">🐱💔</div>
+      <div class="error-emoji">
+        <iconify-icon icon="pixelarticons:cat" style="color: var(--accent-red);"></iconify-icon>
+        <iconify-icon icon="pixelarticons:heart-broken" style="color: var(--accent-red);"></iconify-icon>
+      </div>
       <h2 class="error-title">Subscription not found</h2>
       <p class="error-subtitle">Please double check your link, nya~</p>
     </div>
@@ -75,11 +78,11 @@
       <!-- Footer -->
       <footer class="footer">
         <div class="footer-art">
-          <span class="footer-cat">🐱</span>
-          <span class="footer-sparkle">✨</span>
+          <span class="footer-cat"><iconify-icon icon="pixelarticons:cat" style="color: var(--accent-mint);"></iconify-icon></span>
+          <span class="footer-sparkle"><iconify-icon icon="pixelarticons:flash" style="color: var(--accent-yellow);"></iconify-icon></span>
         </div>
         <p class="footer-text">Powered by pixel magic, nya~</p>
-        <p class="footer-sub">Built with 💜 and SvelteKit</p>
+        <p class="footer-sub">Built with <iconify-icon icon="pixelarticons:heart" style="color: var(--accent-pink); vertical-align: middle; font-size: 8px;"></iconify-icon> and SvelteKit</p>
       </footer>
     </div>
   </main>
@@ -118,6 +121,10 @@
   .error-emoji {
     font-size: 40px;
     margin-bottom: 16px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
   }
 
   .error-title {

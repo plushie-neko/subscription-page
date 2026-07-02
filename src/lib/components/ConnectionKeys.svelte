@@ -53,7 +53,7 @@
       <div class="keys-list">
         {#each parsedLinks as link, i}
           <div class="key-item">
-            <span class="key-icon">🔑</span>
+            <span class="key-icon"><iconify-icon icon="pixelarticons:key"></iconify-icon></span>
             <span class="key-name">{link.name}</span>
             <div class="key-actions">
               <button
@@ -62,14 +62,18 @@
                 onclick={() => copyLink(link.fullLink, i)}
                 title="Copy key"
               >
-                {copiedIndex === i ? '✅' : '📋'}
+                {#if copiedIndex === i}
+                  <iconify-icon icon="pixelarticons:check"></iconify-icon>
+                {:else}
+                  <iconify-icon icon="pixelarticons:clipboard"></iconify-icon>
+                {/if}
               </button>
               <button
                 class="icon-btn"
                 onclick={() => showQr(link)}
                 title="Show QR"
               >
-                📱
+                <iconify-icon icon="pixelarticons:device-phone"></iconify-icon>
               </button>
             </div>
           </div>
@@ -86,8 +90,13 @@
   <div class="modal-overlay" onclick={closeQr}>
     <div class="modal-content" onclick={(e) => e.stopPropagation()}>
       <div class="qr-modal-header">
-        <h3 class="qr-title">🔑 {qrModal.name}</h3>
-        <button class="close-btn" onclick={closeQr}>✕</button>
+        <h3 class="qr-title">
+          <iconify-icon icon="pixelarticons:key" style="margin-right: 4px; vertical-align: middle;"></iconify-icon>
+          {qrModal.name}
+        </h3>
+        <button class="close-btn" onclick={closeQr}>
+          <iconify-icon icon="pixelarticons:close"></iconify-icon>
+        </button>
       </div>
 
       {#if qrSvg}
