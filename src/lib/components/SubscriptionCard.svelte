@@ -19,15 +19,15 @@
 	let statusColor = $derived(isActive ? 'success' as const : 'danger' as const);
 
 	let bandwidthValue = $derived(
-		user.trafficLimit === '0'
-			? `${user.trafficUsed} / ∞`
-			: `${user.trafficUsed} / ${user.trafficLimit}`
+		!user.trafficLimit || user.trafficLimit === '0' || user.trafficLimit === '0.00 B'
+			? `${user.trafficUsed || '0 B'} / ${t('unlimited')}`
+			: `${user.trafficUsed || '0 B'} / ${user.trafficLimit}`
 	);
 
 	// Bandwidth progress for ring
 	let progress = $derived(() => {
-		if (user.trafficLimit === '0') return 0;
-		const used = parseFloat(user.trafficUsed);
+		if (!user.trafficLimit || user.trafficLimit === '0' || user.trafficLimit === '0.00 B') return 0;
+		const used = parseFloat(user.trafficUsed || '0');
 		const limit = parseFloat(user.trafficLimit);
 		if (isNaN(used) || isNaN(limit) || limit === 0) return 0;
 		return Math.min(used / limit, 1);
@@ -61,7 +61,7 @@
 				{/if}
 			</div>
 			<div class="user-details">
-				<h2 class="username">{user.username}</h2>
+				<h2 class="username">{user.username || user.shortUuid || 'User'}</h2>
 				<span class="expiry-text" class:expired={user.daysLeft <= 0}>
 					{formatExpiry(user.expiresAt)}
 				</span>
@@ -97,7 +97,7 @@
 
 	<!-- Info chips grid -->
 	<div class="chips-grid">
-		<InfoChip label={t('name')} value={user.username} color="primary">
+		<InfoChip label={t('name')} value={user.username || user.shortUuid || 'User'} color="primary">
 			{#snippet icon()}<User size={16} />{/snippet}
 		</InfoChip>
 
