@@ -2,7 +2,7 @@
    🐱 PIXEL ART DESIGN SYSTEM — NYA EDITION ✨
    ============================================ */
 
-@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Inter:wght@400;500;600;700&family=Vazirmatn:wght@400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Vazirmatn:wght@400;500;600;700;800&display=swap');
 
 
 
@@ -59,7 +59,7 @@
 
   /* Font */
   --font-pixel: 'Press Start 2P', monospace;
-  --font-body: 'Inter', system-ui, sans-serif;
+  --font-body: 'Press Start 2P', monospace;
 
   /* Sizes */
   --pixel: 4px;
@@ -104,11 +104,7 @@
   --btn-pink-text: var(--accent-pink);
 }
 
-/* RTL / Farsi Typography Overrides */
-:root[dir="rtl"] {
-  --font-pixel: 'PixelAE', 'Vazirmatn', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
-  --font-body: 'Vazirmatn', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
-}
+
 
 :root.light {
   --bg-deep: #f5eedc;
