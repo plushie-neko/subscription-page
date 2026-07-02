@@ -1,5 +1,5 @@
 <!--
-  PlatformTabs — M3 segmented button style tabs for platform selection.
+  PlatformTabs — BeerCSS tabs for platform selection.
 -->
 <script lang="ts">
 	interface PlatformOption {
@@ -20,7 +20,7 @@
 </script>
 
 {#if platforms.length > 1}
-	<div class="platform-tabs" role="tablist">
+	<div class="scroll tabs platform-tabs-nav">
 		{#each platforms as platform (platform.key)}
 			{@const isActive = platform.key === selected}
 			<button
@@ -31,80 +31,69 @@
 				onclick={() => onselect(platform.key)}
 			>
 				{#if svgLibrary[platform.svgIconKey]}
-					<span class="tab-icon" >
+					<span class="tab-icon" class:active-icon={isActive}>
 						{@html svgLibrary[platform.svgIconKey]}
 					</span>
 				{/if}
-				<span class="tab-label">{t(platform.displayName)}</span>
+				<span>{t(platform.displayName)}</span>
 			</button>
 		{/each}
 	</div>
 {/if}
 
 <style>
-	.platform-tabs {
+	.platform-tabs-nav {
+		background: transparent !important;
+		border-bottom: 1px solid var(--glass-border) !important;
 		display: flex;
-		gap: 4px;
-		padding: 4px;
-		background: var(--md-sys-color-surface-container, #1e1e2e);
-		border-radius: var(--radius-full);
-		border: 1px solid var(--glass-border);
-		overflow-x: auto;
-		scrollbar-width: none;
-	}
-
-	.platform-tabs::-webkit-scrollbar {
-		display: none;
+		justify-content: center;
+		margin-bottom: var(--space-md);
 	}
 
 	.tab-btn {
-		display: flex;
+		background: transparent !important;
+		border: none !important;
+		color: var(--on-surface-variant) !important;
+		display: inline-flex;
 		align-items: center;
-		gap: 6px;
-		padding: 8px 16px;
-		border: none;
-		border-radius: var(--radius-full);
-		background: transparent;
-		color: var(--md-sys-color-on-surface-variant);
+		gap: var(--space-xs);
+		padding: var(--space-md) var(--space-lg) !important;
+		cursor: pointer;
 		font-family: var(--font-body);
 		font-size: var(--text-label-lg);
 		font-weight: 500;
-		cursor: pointer;
-		transition: all var(--transition-normal);
-		white-space: nowrap;
-		flex-shrink: 0;
+		transition: all var(--transition-fast);
+		border-bottom: 2px solid transparent !important;
+		border-radius: 0 !important;
+		height: auto !important;
 	}
 
 	.tab-btn:hover:not(.active) {
-		background: color-mix(in srgb, var(--md-sys-color-on-surface) 8%, transparent);
+		color: var(--on-surface) !important;
+		background: color-mix(in srgb, var(--on-surface) 6%, transparent) !important;
 	}
 
 	.tab-btn.active {
-		background: var(--md-sys-color-secondary-container);
-		color: var(--md-sys-color-on-secondary-container);
+		color: var(--primary) !important;
+		border-bottom-color: var(--primary) !important;
 		font-weight: 600;
 	}
 
 	.tab-icon {
-		display: flex;
+		display: inline-flex;
 		align-items: center;
 		width: 18px;
 		height: 18px;
+		fill: var(--on-surface-variant);
 	}
 
 	.tab-icon :global(svg) {
 		width: 18px;
 		height: 18px;
+		fill: currentColor;
 	}
 
-	.tab-label {
-		line-height: 1;
-	}
-
-	@media (max-width: 480px) {
-		.tab-btn {
-			padding: 6px 12px;
-			font-size: var(--text-label-md);
-		}
+	.tab-btn.active .tab-icon {
+		fill: var(--primary);
 	}
 </style>

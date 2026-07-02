@@ -95,6 +95,7 @@ export function tokensToCSS(tokens: M3Tokens): string {
 	// System tokens
 	for (const [key, hex] of Object.entries(tokens.sys)) {
 		lines.push(`  --md-sys-color-${key}: ${hex};`);
+		lines.push(`  --${key}: ${hex};`);
 	}
 
 	lines.push('}');

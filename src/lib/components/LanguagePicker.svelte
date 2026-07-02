@@ -1,9 +1,7 @@
 <!--
-  LanguagePicker — M3 dropdown for locale selection with flags.
+  LanguagePicker — BeerCSS dropdown for locale selection.
 -->
 <script lang="ts">
-	import { Globe } from '@lucide/svelte';
-
 	interface Props {
 		locales: string[];
 		currentLang: string;
@@ -35,10 +33,9 @@
 </script>
 
 {#if locales.length > 1}
-	<div class="lang-picker animate-in stagger-5">
-		<Globe size={16} />
+	<div class="field round fill prefix suffix no-margin animate-in stagger-5 lang-picker-field">
+		<i>language</i>
 		<select
-			class="lang-select"
 			value={currentLang}
 			onchange={(e) => onchange(e.currentTarget.value)}
 		>
@@ -46,42 +43,32 @@
 				<option value={locale}>{getLabel(locale)}</option>
 			{/each}
 		</select>
+		<i>arrow_drop_down</i>
 	</div>
 {/if}
 
 <style>
-	.lang-picker {
-		display: inline-flex;
-		align-items: center;
-		gap: var(--space-sm);
-		padding: 6px 12px;
-		background: var(--md-sys-color-surface-container, #1e1e2e);
-		border: 1px solid var(--glass-border);
-		border-radius: var(--radius-full);
-		color: var(--md-sys-color-on-surface-variant);
+	.lang-picker-field {
+		max-width: 220px;
+		margin: 0 auto;
+		background: var(--surface-container) !important;
+		border: 1px solid var(--glass-border) !important;
 		transition: all var(--transition-fast);
 	}
-
-	.lang-picker:hover {
-		border-color: var(--md-sys-color-outline);
+	
+	.lang-picker-field:hover {
+		border-color: var(--outline) !important;
 	}
 
-	.lang-select {
-		background: transparent;
-		border: none;
-		color: var(--md-sys-color-on-surface);
+	.lang-picker-field select {
 		font-family: var(--font-body);
 		font-size: var(--text-label-lg);
+		color: var(--on-surface) !important;
 		cursor: pointer;
-		outline: none;
-		-webkit-appearance: none;
-		-moz-appearance: none;
-		appearance: none;
-		padding-right: 4px;
 	}
 
-	.lang-select option {
-		background: var(--md-sys-color-surface-container-high);
-		color: var(--md-sys-color-on-surface);
+	.lang-picker-field option {
+		background: var(--surface-container-high) !important;
+		color: var(--on-surface) !important;
 	}
 </style>

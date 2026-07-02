@@ -1,4 +1,5 @@
 <script lang="ts">
+	import 'beercss/dist/cdn/beer.min.css';
 	import '$lib/styles/tokens.css';
 	import '$lib/styles/animations.css';
 	import { onMount } from 'svelte';
@@ -7,6 +8,9 @@
 	let { children } = $props();
 
 	onMount(() => {
+		// Dynamically import BeerCSS JavaScript client-side to prevent SSR window reference errors
+		import('beercss');
+
 		const tokens = generateM3Tokens(DEFAULT_SEED);
 		const cssText = tokensToCSS(tokens);
 

@@ -1,5 +1,5 @@
 <!--
-  InfoChip — M3 tonal chip displaying icon + label + value.
+  InfoChip — BeerCSS row component displaying icon + label + value.
   Used for username, status, expiry, bandwidth.
 -->
 <script lang="ts">
@@ -15,7 +15,7 @@
 	let { label, value, color = 'primary', icon }: Props = $props();
 
 	const colorMap = {
-		primary: 'var(--md-sys-color-primary)',
+		primary: 'var(--primary)',
 		success: 'var(--color-success)',
 		danger: 'var(--color-danger)',
 		warning: 'var(--color-warning)',
@@ -23,79 +23,71 @@
 	};
 
 	const bgMap = {
-		primary: 'var(--md-sys-color-primary-container)',
+		primary: 'var(--primary-container)',
 		success: 'var(--color-success-container)',
 		danger: 'var(--color-danger-container)',
 		warning: 'var(--color-warning-container)',
 		info: 'var(--color-info-container)'
 	};
+
+	const onColorMap = {
+		primary: 'var(--on-primary-container)',
+		success: 'var(--color-success)',
+		danger: 'var(--color-danger)',
+		warning: 'var(--color-warning)',
+		info: 'var(--color-info)'
+	};
 </script>
 
-<div class="info-chip" style="--chip-color: {colorMap[color]}; --chip-bg: {bgMap[color]}">
+<div
+	class="info-row row align-center padding border round"
+	style="--row-bg: {bgMap[color]}; --row-border: {colorMap[color]}; --row-text: {onColorMap[color]}"
+>
 	{#if icon}
-		<div class="chip-icon">
+		<div class="row-icon circle center">
 			{@render icon()}
 		</div>
 	{/if}
-	<div class="chip-content">
-		<span class="chip-label">{label}</span>
-		<span class="chip-value">{value}</span>
+	<div class="max truncate">
+		<div class="row-label font-body">{label}</div>
+		<div class="row-value font-display">{value}</div>
 	</div>
 </div>
 
 <style>
-	.info-chip {
-		display: flex;
-		align-items: center;
-		gap: var(--space-sm);
-		padding: var(--space-sm) var(--space-md);
-		background: var(--chip-bg);
-		border-radius: var(--radius-md);
-		border: 1px solid color-mix(in srgb, var(--chip-color) 20%, transparent);
+	.info-row {
+		background: var(--row-bg) !important;
+		border-color: color-mix(in srgb, var(--row-border) 25%, transparent) !important;
 		transition: transform var(--transition-fast), box-shadow var(--transition-fast);
 	}
 
-	.info-chip:hover {
-		transform: translateY(-1px);
-		box-shadow: 0 4px 12px color-mix(in srgb, var(--chip-color) 15%, transparent);
+	.info-row:hover {
+		transform: translateY(-2px);
+		box-shadow: 0 4px 12px color-mix(in srgb, var(--row-border) 15%, transparent);
 	}
 
-	.chip-icon {
+	.row-icon {
+		width: 36px;
+		height: 36px;
+		background: color-mix(in srgb, var(--row-border) 12%, transparent);
+		color: var(--row-border);
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		width: 36px;
-		height: 36px;
-		border-radius: var(--radius-sm);
-		background: color-mix(in srgb, var(--chip-color) 15%, transparent);
-		color: var(--chip-color);
-		flex-shrink: 0;
 	}
 
-	.chip-content {
-		display: flex;
-		flex-direction: column;
-		gap: 2px;
-		min-width: 0;
-		flex: 1;
-	}
-
-	.chip-label {
-		font-family: var(--font-body);
+	.row-label {
 		font-size: var(--text-label-sm);
 		font-weight: 500;
 		text-transform: uppercase;
 		letter-spacing: 0.05em;
-		color: var(--md-sys-color-on-surface-variant);
-		line-height: 1;
+		opacity: 0.8;
+		color: var(--row-text);
 	}
 
-	.chip-value {
-		font-family: var(--font-display);
+	.row-value {
 		font-size: var(--text-body-md);
 		font-weight: 600;
-		color: var(--md-sys-color-on-surface);
-		line-height: 1.2;
 		overflow: hidden;
 		text-overflow: ellipsis;
 		white-space: nowrap;

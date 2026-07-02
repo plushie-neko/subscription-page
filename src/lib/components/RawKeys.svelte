@@ -1,8 +1,8 @@
 <!--
   RawKeys — Connection keys list with copy + QR actions.
+  Rebuilt with BeerCSS article.card and row list classes.
 -->
 <script lang="ts">
-	import { Key, Copy, Check, QrCode } from '@lucide/svelte';
 	import QrModal from './QrModal.svelte';
 
 	interface ParsedLink {
@@ -49,48 +49,43 @@
 </script>
 
 {#if links.length > 0}
-	<div class="raw-keys animate-in stagger-3">
-		<div class="keys-header">
-			<h3 class="keys-title">{t('connectionKeysHeader')}</h3>
+	<article class="card elevated raw-keys-card animate-in stagger-3 no-margin">
+		<div class="row align-center keys-card-header">
+			<h5 class="max font-display no-margin">{t('connectionKeysHeader')}</h5>
 			{#if parsedLinks.length > 1}
-				<span class="keys-badge">{parsedLinks.length}</span>
+				<span class="chip primary-container label small-round">{parsedLinks.length}</span>
 			{/if}
 		</div>
 
-		<div class="keys-list">
+		<div class="space"></div>
+
+		<div class="keys-list-scroll">
 			{#each parsedLinks as link, i (i)}
-				<div class="key-item">
-					<div class="key-info">
-						<div class="key-icon">
-							<Key size={16} />
-						</div>
-						<span class="key-name">{link.name}</span>
-					</div>
-					<div class="key-actions">
+				<div class="row align-center key-list-row border-bottom">
+					<i class="primary-text">vpn_key</i>
+					<div class="max truncate key-name font-body">{link.name}</div>
+					
+					<nav class="row no-space key-item-actions">
 						<button
-							class="icon-btn"
-							class:copied={copiedIndex === i}
+							class="circle transparent"
+							class:success-text={copiedIndex === i}
 							onclick={() => handleCopy(link.fullLink, i)}
 							title="Copy"
 						>
-							{#if copiedIndex === i}
-								<Check size={16} />
-							{:else}
-								<Copy size={16} />
-							{/if}
+							<i>{copiedIndex === i ? 'check' : 'content_copy'}</i>
 						</button>
 						<button
-							class="icon-btn qr"
+							class="circle transparent"
 							onclick={() => showQr(link)}
 							title="QR Code"
 						>
-							<QrCode size={16} />
+							<i>qr_code</i>
 						</button>
-					</div>
+					</nav>
 				</div>
 			{/each}
 		</div>
-	</div>
+	</article>
 
 	<QrModal
 		bind:open={qrModalOpen}
@@ -103,126 +98,56 @@
 {/if}
 
 <style>
-	.raw-keys {
-		background: var(--md-sys-color-surface-container-low, #1e1e2e);
-		border-radius: var(--radius-lg);
-		padding: var(--space-lg);
-		border: 1px solid var(--glass-border);
+	.raw-keys-card {
+		background: var(--surface-container-low) !important;
+		border-radius: var(--radius-lg) !important;
+		border: 1px solid var(--glass-border) !important;
+		padding: var(--space-lg) !important;
 	}
 
-	.keys-header {
-		display: flex;
-		align-items: center;
-		justify-content: space-between;
-		margin-bottom: var(--space-md);
+	.keys-card-header {
+		margin-bottom: var(--space-xs);
 	}
 
-	.keys-title {
-		font-family: var(--font-display);
-		font-size: var(--text-title-lg);
-		font-weight: 700;
-		color: var(--md-sys-color-on-surface);
-		margin: 0;
-	}
-
-	.keys-badge {
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		min-width: 28px;
-		height: 28px;
-		padding: 0 8px;
-		border-radius: var(--radius-full);
-		background: var(--md-sys-color-primary-container);
-		color: var(--md-sys-color-on-primary-container);
-		font-size: var(--text-label-md);
-		font-weight: 700;
-	}
-
-	.keys-list {
+	.keys-list-scroll {
 		display: flex;
 		flex-direction: column;
-		gap: var(--space-xs);
-		max-height: 300px;
+		max-height: 280px;
 		overflow-y: auto;
+		scrollbar-width: thin;
 	}
 
-	.key-item {
-		display: flex;
-		align-items: center;
-		justify-content: space-between;
-		gap: var(--space-sm);
-		padding: var(--space-sm) var(--space-md);
-		background: var(--md-sys-color-surface-container, #1a1a2e);
-		border-radius: var(--radius-sm);
-		border: 1px solid transparent;
-		transition: all var(--transition-fast);
+	.key-list-row {
+		padding: var(--space-xs) var(--space-sm) !important;
+		transition: background var(--transition-fast);
+		border-bottom-color: var(--glass-border) !important;
 	}
 
-	.key-item:hover {
-		border-color: var(--glass-border);
-		background: var(--md-sys-color-surface-container-high);
-	}
-
-	.key-info {
-		display: flex;
-		align-items: center;
-		gap: var(--space-sm);
-		min-width: 0;
-		flex: 1;
-	}
-
-	.key-icon {
-		color: var(--md-sys-color-primary);
-		flex-shrink: 0;
-		display: flex;
+	.key-list-row:hover {
+		background: color-mix(in srgb, var(--on-surface) 4%, transparent);
 	}
 
 	.key-name {
 		font-size: var(--text-body-md);
 		font-weight: 500;
-		color: var(--md-sys-color-on-surface);
-		overflow: hidden;
-		text-overflow: ellipsis;
-		white-space: nowrap;
+		color: var(--on-surface);
 	}
 
-	.key-actions {
-		display: flex;
-		gap: 4px;
-		flex-shrink: 0;
+	.key-item-actions button {
+		color: var(--on-surface-variant);
 	}
 
-	.icon-btn {
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		width: 32px;
-		height: 32px;
-		border: none;
-		border-radius: var(--radius-xs);
-		background: transparent;
-		color: var(--md-sys-color-on-surface-variant);
-		cursor: pointer;
-		transition: all var(--transition-fast);
+	.key-item-actions button:hover {
+		color: var(--on-surface);
 	}
 
-	.icon-btn:hover {
-		background: color-mix(in srgb, var(--md-sys-color-on-surface) 10%, transparent);
-		color: var(--md-sys-color-on-surface);
-	}
-
-	.icon-btn.copied {
-		color: var(--color-success);
-	}
-
-	.icon-btn.qr:hover {
-		color: var(--md-sys-color-primary);
+	.success-text {
+		color: var(--color-success) !important;
 	}
 
 	@media (max-width: 480px) {
-		.raw-keys {
-			padding: var(--space-md);
+		.raw-keys-card {
+			padding: var(--space-md) !important;
 		}
 
 		.key-name {

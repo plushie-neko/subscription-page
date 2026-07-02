@@ -1,11 +1,10 @@
 <!--
   SubscriptionCard — Hero card with user info, status, bandwidth progress ring.
-  M3E elevated card with glassmorphism and cute animations.
+  Rebuilt with BeerCSS article.card classes.
 -->
 <script lang="ts">
 	import type { SubscriptionUser } from '$lib/types';
 	import InfoChip from './InfoChip.svelte';
-	import { User, Check, X, Calendar, ArrowUpDown, Activity } from '@lucide/svelte';
 	import { getExpirationText } from '$lib/utils/format';
 	import { currentLang, config } from '$lib/stores/subscription';
 
@@ -50,27 +49,22 @@
 	);
 </script>
 
-<div class="subscription-card animate-in stagger-1">
-	<!-- Header with status glow -->
-	<div class="card-header">
-		<div class="user-info">
-			<div class="status-indicator" class:active={isActive} class:inactive={!isActive}>
-				{#if isActive}
-					<Check size={20} />
-				{:else}
-					<X size={20} />
-				{/if}
-			</div>
-			<div class="user-details">
-				<h2 class="username">{user.username || user.shortUuid || 'User'}</h2>
-				<span class="expiry-text" class:expired={user.userStatus === 'EXPIRED' || user.daysLeft <= 0}>
-					{expirationText}
-				</span>
-			</div>
+<article class="card elevated hero-subscription-card animate-in stagger-1 no-margin">
+	<!-- Hero header with user info & bandwidth progress -->
+	<div class="row align-center card-hero-header">
+		<div class="status-indicator-circle center circle" class:active={isActive} class:inactive={!isActive}>
+			<i>{isActive ? 'check' : 'close'}</i>
+		</div>
+		
+		<div class="max truncate user-details-box">
+			<h4 class="username font-display no-margin">{user.username || user.shortUuid || 'User'}</h4>
+			<p class="expiry-label font-body no-margin" class:expired={user.userStatus === 'EXPIRED' || user.daysLeft <= 0}>
+				{expirationText}
+			</p>
 		</div>
 
 		<!-- Bandwidth ring -->
-		<div class="bandwidth-ring" title="{bandwidthValue}">
+		<div class="bandwidth-ring-box" title={bandwidthValue}>
 			<svg viewBox="0 0 100 100">
 				<circle
 					class="ring-bg"
@@ -90,180 +84,155 @@
 					style="--ring-circumference: {ringCircumference}; --ring-offset: {ringOffset}"
 				/>
 			</svg>
-			<div class="ring-label">
-				<Activity size={14} />
+			<div class="ring-label-icon">
+				<i>speed</i>
 			</div>
 		</div>
 	</div>
 
+	<div class="space"></div>
+
 	<!-- Info chips grid -->
-	<div class="chips-grid">
-		<InfoChip label={$config?.baseTranslations ? t($config.baseTranslations.name) : 'Username'} value={user.username || user.shortUuid || 'User'} color="primary">
-			{#snippet icon()}<User size={16} />{/snippet}
-		</InfoChip>
+	<div class="grid no-space">
+		<div class="s12 m6 padding-xs">
+			<InfoChip label={$config?.baseTranslations ? t($config.baseTranslations.name) : 'Username'} value={user.username || user.shortUuid || 'User'} color="primary">
+				{#snippet icon()}<i>person</i>{/snippet}
+			</InfoChip>
+		</div>
 
-		<InfoChip label={$config?.baseTranslations ? t($config.baseTranslations.status) : 'Status'} value={statusText} color={statusColor}>
-			{#snippet icon()}
-				{#if isActive}<Check size={16} />{:else}<X size={16} />{/if}
-			{/snippet}
-		</InfoChip>
+		<div class="s12 m6 padding-xs">
+			<InfoChip label={$config?.baseTranslations ? t($config.baseTranslations.status) : 'Status'} value={statusText} color={statusColor}>
+				{#snippet icon()}
+					<i>{isActive ? 'check' : 'close'}</i>
+				{/snippet}
+			</InfoChip>
+		</div>
 
-		<InfoChip label={$config?.baseTranslations ? t($config.baseTranslations.expires) : 'Expires'} value={expirationText} color="warning">
-			{#snippet icon()}<Calendar size={16} />{/snippet}
-		</InfoChip>
+		<div class="s12 m6 padding-xs">
+			<InfoChip label={$config?.baseTranslations ? t($config.baseTranslations.expires) : 'Expires'} value={expirationText} color="warning">
+				{#snippet icon()}<i>calendar_today</i>{/snippet}
+			</InfoChip>
+		</div>
 
-		<InfoChip label={$config?.baseTranslations ? t($config.baseTranslations.bandwidth) : 'Bandwidth'} value={bandwidthValue} color="info">
-			{#snippet icon()}<ArrowUpDown size={16} />{/snippet}
-		</InfoChip>
+		<div class="s12 m6 padding-xs">
+			<InfoChip label={$config?.baseTranslations ? t($config.baseTranslations.bandwidth) : 'Bandwidth'} value={bandwidthValue} color="info">
+				{#snippet icon()}<i>swap_vert</i>{/snippet}
+			</InfoChip>
+		</div>
 	</div>
-</div>
+</article>
 
 <style>
-	.subscription-card {
-		background: var(--md-sys-color-surface-container-low, #1e1e2e);
-		border-radius: var(--radius-lg);
-		padding: var(--space-lg);
-		border: 1px solid var(--glass-border);
+	.hero-subscription-card {
+		background: var(--surface-container-low) !important;
+		border-radius: var(--radius-lg) !important;
+		border: 1px solid var(--glass-border) !important;
+		padding: var(--space-lg) !important;
 		position: relative;
 		overflow: hidden;
 	}
 
-	/* Subtle gradient overlay */
-	.subscription-card::before {
+	.hero-subscription-card::before {
 		content: '';
 		position: absolute;
 		top: 0;
 		left: 0;
 		right: 0;
-		height: 120px;
+		height: 100px;
 		background: linear-gradient(
 			135deg,
-			color-mix(in srgb, var(--md-sys-color-primary) 8%, transparent),
-			color-mix(in srgb, var(--md-sys-color-tertiary) 5%, transparent)
+			color-mix(in srgb, var(--primary) 8%, transparent),
+			color-mix(in srgb, var(--tertiary) 5%, transparent)
 		);
 		pointer-events: none;
 	}
 
-	.card-header {
-		display: flex;
-		align-items: center;
-		justify-content: space-between;
-		margin-bottom: var(--space-lg);
+	.card-hero-header {
 		position: relative;
 		z-index: 1;
 	}
 
-	.user-info {
-		display: flex;
-		align-items: center;
-		gap: var(--space-md);
-		min-width: 0;
-		flex: 1;
-	}
-
-	.status-indicator {
+	.status-indicator-circle {
 		width: 44px;
 		height: 44px;
-		border-radius: 50%;
-		display: flex;
-		align-items: center;
-		justify-content: center;
 		flex-shrink: 0;
-		transition: all var(--transition-normal);
 	}
 
-	.status-indicator.active {
+	.status-indicator-circle.active {
 		background: var(--color-success-container);
 		color: var(--color-success);
 		animation: gentle-pulse 2s ease-in-out infinite;
 	}
 
-	.status-indicator.inactive {
+	.status-indicator-circle.inactive {
 		background: var(--color-danger-container);
 		color: var(--color-danger);
 	}
 
-	.user-details {
-		min-width: 0;
-		flex: 1;
+	.user-details-box {
+		padding-left: var(--space-xs);
 	}
 
 	.username {
-		font-family: var(--font-display);
-		font-size: var(--text-title-lg);
 		font-weight: 700;
-		color: var(--md-sys-color-on-surface);
-		margin: 0;
-		overflow: hidden;
-		text-overflow: ellipsis;
-		white-space: nowrap;
-		line-height: 1.3;
+		color: var(--on-surface);
 	}
 
-	.expiry-text {
+	.expiry-label {
 		font-size: var(--text-body-sm);
-		color: var(--md-sys-color-on-surface-variant);
+		color: var(--on-surface-variant);
 		font-weight: 500;
+		margin-top: 2px;
 	}
 
-	.expiry-text.expired {
+	.expiry-label.expired {
 		color: var(--color-danger);
 	}
 
-	/* Bandwidth ring */
-	.bandwidth-ring {
+	.bandwidth-ring-box {
 		width: 56px;
 		height: 56px;
 		position: relative;
 		flex-shrink: 0;
 	}
 
-	.bandwidth-ring svg {
+	.bandwidth-ring-box svg {
 		width: 100%;
 		height: 100%;
 	}
 
 	.ring-bg {
-		stroke: var(--md-sys-color-surface-container-highest, #333);
+		stroke: var(--surface-container-highest);
 	}
 
 	.ring-fill {
-		stroke: var(--md-sys-color-primary);
+		stroke: var(--primary);
 		transition: stroke-dashoffset 1s cubic-bezier(0.2, 0, 0, 1);
 	}
 
-	.ring-label {
+	.ring-label-icon {
 		position: absolute;
 		top: 50%;
 		left: 50%;
 		transform: translate(-50%, -50%);
-		color: var(--md-sys-color-primary);
+		color: var(--primary);
 		display: flex;
 	}
 
-	/* Chips grid */
-	.chips-grid {
-		display: grid;
-		grid-template-columns: repeat(2, 1fr);
-		gap: var(--space-sm);
-		position: relative;
-		z-index: 1;
+	.ring-label-icon i {
+		font-size: 16px;
+	}
+
+	.padding-xs {
+		padding: 4px !important;
 	}
 
 	@media (max-width: 480px) {
-		.chips-grid {
-			grid-template-columns: 1fr;
+		.hero-subscription-card {
+			padding: var(--space-md) !important;
 		}
 
-		.subscription-card {
-			padding: var(--space-md);
-		}
-
-		.username {
-			font-size: var(--text-title-md);
-		}
-
-		.bandwidth-ring {
+		.bandwidth-ring-box {
 			width: 44px;
 			height: 44px;
 		}

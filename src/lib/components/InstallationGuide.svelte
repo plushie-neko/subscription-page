@@ -1,11 +1,10 @@
 <!--
   InstallationGuide — Renders different guides (timeline, minimal, accordion, cards)
-  based on config.uiConfig.installationGuidesBlockType, pulling icons from svgLibrary.
+  based on config.uiConfig.installationGuidesBlockType, styled with BeerCSS.
 -->
 <script lang="ts">
 	import type { SubpageConfig, PlatformKey, PlatformAppButton } from '$lib/types';
 	import PlatformTabs from './PlatformTabs.svelte';
-	import { ExternalLink, Copy, Link } from '@lucide/svelte';
 	import { getColorGradient, getColorGradientSolid } from '$lib/utils/color';
 	import { formatTemplate } from '$lib/utils/format';
 
@@ -27,7 +26,6 @@
 
 	let selectedPlatform = $state('');
 	let selectedAppIndex = $state(0);
-	let openAccordion = $state(0);
 
 	$effect(() => {
 		if (platforms.length > 0 && !selectedPlatform) {
@@ -43,7 +41,6 @@
 	function selectPlatform(key: string) {
 		selectedPlatform = key;
 		selectedAppIndex = 0;
-		openAccordion = 0;
 	}
 
 	function formatLink(link: string): string {
@@ -62,53 +59,41 @@
 		copied = id;
 		setTimeout(() => copied = '', 2000);
 	}
-
-	function toggleAccordion(index: number) {
-		if (openAccordion === index) {
-			openAccordion = -1;
-		} else {
-			openAccordion = index;
-		}
-		
-		// Vibration feedback matching original app
-		if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
-			try {
-				navigator.vibrate(10);
-			} catch { /* */ }
-		}
-	}
 </script>
 
 {#if platforms.length > 0}
-	<div class="installation-guide animate-in stagger-2">
-		<div class="guide-header">
-			<h3 class="guide-title">{t('installationGuideHeader')}</h3>
-			<PlatformTabs
-				platforms={platforms}
-				selected={selectedPlatform}
-				svgLibrary={config.svgLibrary}
-				{t}
-				onselect={selectPlatform}
-			/>
+	<article class="card elevated installation-guide-card animate-in stagger-2 no-margin">
+		<div class="row align-center guide-header no-space">
+			<h5 class="max font-display no-margin">{t('installationGuideHeader')}</h5>
 		</div>
+
+		<PlatformTabs
+			platforms={platforms}
+			selected={selectedPlatform}
+			svgLibrary={config.svgLibrary}
+			{t}
+			onselect={selectPlatform}
+		/>
 
 		<!-- App selector pills -->
 		{#if currentPlatform && currentPlatform.apps.length > 1}
-			<div class="app-pills">
+			<div class="row scroll no-space app-pills-row">
 				{#each currentPlatform.apps as app, i (app.name)}
 					<button
-						class="app-pill"
-						class:active={i === selectedAppIndex}
-						class:featured={app.featured}
-						onclick={() => { selectedAppIndex = i; openAccordion = 0; }}
+						class="chip"
+						class:fill={i === selectedAppIndex}
+						class:primary={i === selectedAppIndex}
+						class:border={i !== selectedAppIndex}
+						onclick={() => selectedAppIndex = i}
 					>
 						{#if app.featured}
 							<span class="featured-dot"></span>
 						{/if}
-						{app.name}
+						<span>{app.name}</span>
 					</button>
 				{/each}
 			</div>
+			<div class="space"></div>
 		{/if}
 
 		<!-- Blocks container -->
@@ -123,8 +108,8 @@
 						<div class="timeline-item animate-in" style="animation-delay: {i * 80 + 100}ms">
 							<div class="timeline-bullet-wrapper">
 								<div
-									class="timeline-bullet"
-									style="background: {gradient.background}; border: {gradient.border}; box-shadow: {gradient.boxShadow || 'none'};"
+									class="timeline-bullet circle center"
+									style="background: {gradient.background}; border: 1px solid {gradient.border};"
 								>
 									{#if config.svgLibrary[block.svgIconKey]}
 										<span class="icon-wrapper">{@html config.svgLibrary[block.svgIconKey]}</span>
@@ -135,14 +120,14 @@
 								{/if}
 							</div>
 							<div class="timeline-content">
-								<h4 class="block-title">{@html t(block.title)}</h4>
-								<p class="block-desc">{@html t(block.description)}</p>
+								<h6 class="block-title font-display">{@html t(block.title)}</h6>
+								<p class="block-desc font-body">{@html t(block.description)}</p>
 								{#if block.buttons.length > 0}
-									<div class="block-buttons">
+									<nav class="row block-buttons">
 										{#each block.buttons as button, btnIdx}
-											{@render actionButton(button, `${i}-${btnIdx}`, 'light')}
+											{@render actionButton(button, `${i}-${btnIdx}`, 'border')}
 										{/each}
-									</div>
+									</nav>
 								{/if}
 							</div>
 						</div>
@@ -150,29 +135,33 @@
 				</div>
 			{:else if blockType === 'minimal'}
 				<!-- MINIMAL LAYOUT -->
-				<div class="minimal-layout">
+				<div class="minimal-layout grid no-space">
 					{#each currentApp.blocks as block, i}
 						{@const gradient = getColorGradient(block.svgIconColor)}
-						<div class="minimal-item animate-in" style="animation-delay: {i * 80 + 100}ms">
-							<div class="minimal-header">
-								<div
-									class="minimal-icon"
-									style="background: {gradient.background}; border: {gradient.border};"
-								>
-									{#if config.svgLibrary[block.svgIconKey]}
-										<span class="icon-wrapper">{@html config.svgLibrary[block.svgIconKey]}</span>
-									{/if}
+						<div class="s12 padding-xs minimal-item-cell">
+							<div class="minimal-item animate-in border padding round" style="animation-delay: {i * 80 + 100}ms">
+								<div class="row align-center minimal-header">
+									<div
+										class="minimal-icon circle center"
+										style="background: {gradient.background}; border: 1px solid {gradient.border};"
+									>
+										{#if config.svgLibrary[block.svgIconKey]}
+											<span class="icon-wrapper">{@html config.svgLibrary[block.svgIconKey]}</span>
+										{/if}
+									</div>
+									<h6 class="block-title font-display max no-margin">{@html t(block.title)}</h6>
 								</div>
-								<h4 class="block-title">{@html t(block.title)}</h4>
+								<div class="space"></div>
+								<p class="block-desc font-body no-margin">{@html t(block.description)}</p>
+								{#if block.buttons.length > 0}
+									<div class="space"></div>
+									<nav class="row block-buttons no-space">
+										{#each block.buttons as button, btnIdx}
+											{@render actionButton(button, `${i}-${btnIdx}`, 'transparent')}
+										{/each}
+									</nav>
+								{/if}
 							</div>
-							<p class="block-desc">{@html t(block.description)}</p>
-							{#if block.buttons.length > 0}
-								<div class="block-buttons minimal-buttons">
-									{#each block.buttons as button, btnIdx}
-										{@render actionButton(button, `${i}-${btnIdx}`, 'subtle')}
-									{/each}
-								</div>
-							{/if}
 						</div>
 					{/each}
 				</div>
@@ -181,39 +170,30 @@
 				<div class="accordion-layout">
 					{#each currentApp.blocks as block, i}
 						{@const gradient = getColorGradient(block.svgIconColor)}
-						{@const isOpen = openAccordion === i}
-						<div class="accordion-item" class:open={isOpen}>
-							<button
-								class="accordion-header"
-								onclick={() => toggleAccordion(i)}
-								aria-expanded={isOpen}
-							>
-								<div class="accordion-header-left">
-									<div
-										class="accordion-icon"
-										style="background: {gradient.background}; border: {gradient.border};"
-									>
-										{#if config.svgLibrary[block.svgIconKey]}
-											<span class="icon-wrapper">{@html config.svgLibrary[block.svgIconKey]}</span>
-										{/if}
-									</div>
-									<h4 class="block-title">{@html t(block.title)}</h4>
-								</div>
-								<svg class="chevron" class:rotate={isOpen} xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
-							</button>
-							{#if isOpen}
-								<div class="accordion-content">
-									<p class="block-desc">{@html t(block.description)}</p>
-									{#if block.buttons.length > 0}
-										<div class="block-buttons">
-											{#each block.buttons as button, btnIdx}
-												{@render actionButton(button, `${i}-${btnIdx}`, 'light')}
-											{/each}
-										</div>
+						<details class="border round accordion-details">
+							<summary class="row align-center">
+								<div
+									class="accordion-icon circle center"
+									style="background: {gradient.background}; border: 1px solid {gradient.border};"
+								>
+									{#if config.svgLibrary[block.svgIconKey]}
+										<span class="icon-wrapper">{@html config.svgLibrary[block.svgIconKey]}</span>
 									{/if}
 								</div>
-							{/if}
-						</div>
+								<h6 class="block-title font-display max no-margin">{@html t(block.title)}</h6>
+								<i>expand_more</i>
+							</summary>
+							<div class="accordion-body-content">
+								<p class="block-desc font-body">{@html t(block.description)}</p>
+								{#if block.buttons.length > 0}
+									<nav class="row block-buttons">
+										{#each block.buttons as button, btnIdx}
+											{@render actionButton(button, `${i}-${btnIdx}`, 'border')}
+										{/each}
+									</nav>
+								{/if}
+							</div>
+						</details>
 					{/each}
 				</div>
 			{:else if blockType === 'cards'}
@@ -221,34 +201,36 @@
 				<div class="cards-layout">
 					{#each currentApp.blocks as block, i}
 						{@const gradient = getColorGradient(block.svgIconColor)}
-						<div class="card-item animate-in" style="animation-delay: {i * 80 + 100}ms">
-							<div class="card-left">
+						<article class="card border round padding card-item animate-in" style="animation-delay: {i * 80 + 100}ms">
+							<div class="row align-top">
 								<div
-									class="card-icon"
-									style="background: {gradient.background}; border: {gradient.border};"
+									class="card-icon circle center"
+									style="background: {gradient.background}; border: 1px solid {gradient.border};"
 								>
 									{#if config.svgLibrary[block.svgIconKey]}
 										<span class="icon-wrapper">{@html config.svgLibrary[block.svgIconKey]}</span>
 									{/if}
 								</div>
+								<div class="max card-right-box">
+									<h6 class="block-title font-display no-margin">{@html t(block.title)}</h6>
+									<div class="space"></div>
+									<p class="block-desc font-body no-margin">{@html t(block.description)}</p>
+									{#if block.buttons.length > 0}
+										<div class="space"></div>
+										<nav class="row block-buttons">
+											{#each block.buttons as button, btnIdx}
+												{@render actionButton(button, `${i}-${btnIdx}`, 'border')}
+											{/each}
+										</nav>
+									{/if}
+								</div>
 							</div>
-							<div class="card-right">
-								<h4 class="block-title">{@html t(block.title)}</h4>
-								<p class="block-desc">{@html t(block.description)}</p>
-								{#if block.buttons.length > 0}
-									<div class="block-buttons">
-										{#each block.buttons as button, btnIdx}
-											{@render actionButton(button, `${i}-${btnIdx}`, 'light')}
-										{/each}
-									</div>
-								{/if}
-							</div>
-						</div>
+						</article>
 					{/each}
 				</div>
 			{/if}
 		{/if}
-	</div>
+	</article>
 {/if}
 
 <!-- Reusable Button Snippet -->
@@ -256,7 +238,7 @@
 	{@const href = formatLink(button.link)}
 	{#if button.type === 'external'}
 		<a
-			class="action-btn {styleType}"
+			class="button {styleType} round action-btn"
 			href={button.link}
 			target="_blank"
 			rel="noopener noreferrer"
@@ -264,13 +246,13 @@
 			{#if config.svgLibrary[button.svgIconKey]}
 				<span class="btn-icon">{@html config.svgLibrary[button.svgIconKey]}</span>
 			{:else}
-				<ExternalLink size={16} />
+				<i>open_in_new</i>
 			{/if}
 			<span>{t(button.text)}</span>
 		</a>
 	{:else if button.type === 'subscriptionLink'}
 		<a
-			class="action-btn primary"
+			class="button fill primary round action-btn"
 			href={href}
 			target="_blank"
 			rel="noopener noreferrer"
@@ -278,22 +260,22 @@
 			{#if config.svgLibrary[button.svgIconKey]}
 				<span class="btn-icon">{@html config.svgLibrary[button.svgIconKey]}</span>
 			{:else}
-				<Link size={16} />
+				<i>link</i>
 			{/if}
 			<span>{t(button.text)}</span>
 		</a>
 	{:else if button.type === 'copyButton'}
 		<button
-			class="action-btn {styleType}"
-			class:copied={copied === btnId}
+			class="button {styleType} round action-btn"
+			class:success-button={copied === btnId}
 			onclick={() => copyWithFeedback(button.link, btnId)}
 		>
 			{#if copied === btnId}
-				<span class="btn-icon">✓</span>
+				<i>check</i>
 			{:else if config.svgLibrary[button.svgIconKey]}
 				<span class="btn-icon">{@html config.svgLibrary[button.svgIconKey]}</span>
 			{:else}
-				<Copy size={16} />
+				<i>content_copy</i>
 			{/if}
 			<span>{copied === btnId ? t({ en: 'Copied', ru: 'Скопировано' }) : t(button.text)}</span>
 		</button>
@@ -301,152 +283,67 @@
 {/snippet}
 
 <style>
-	.installation-guide {
-		background: var(--md-sys-color-surface-container-low, #1e1e2e);
-		border-radius: var(--radius-lg);
-		padding: var(--space-lg);
-		border: 1px solid var(--glass-border);
+	.installation-guide-card {
+		background: var(--surface-container-low) !important;
+		border-radius: var(--radius-lg) !important;
+		border: 1px solid var(--glass-border) !important;
+		padding: var(--space-lg) !important;
 	}
 
 	.guide-header {
-		display: flex;
-		align-items: center;
-		justify-content: space-between;
-		gap: var(--space-md);
-		margin-bottom: var(--space-lg);
-		flex-wrap: wrap;
+		margin-bottom: var(--space-md);
 	}
 
-	.guide-title {
-		font-family: var(--font-display);
-		font-size: var(--text-title-lg);
-		font-weight: 700;
-		color: var(--md-sys-color-on-surface);
-		margin: 0;
-	}
-
-	/* App pills */
-	.app-pills {
-		display: flex;
-		gap: var(--space-sm);
-		margin-bottom: var(--space-lg);
-		flex-wrap: wrap;
-	}
-
-	.app-pill {
-		display: flex;
-		align-items: center;
+	.app-pills-row {
 		gap: 6px;
-		padding: 6px 16px;
-		border: 1px solid var(--md-sys-color-outline-variant);
-		border-radius: var(--radius-full);
-		background: transparent;
-		color: var(--md-sys-color-on-surface-variant);
-		font-family: var(--font-body);
-		font-size: var(--text-label-md);
-		font-weight: 500;
-		cursor: pointer;
-		transition: all var(--transition-fast);
-	}
-
-	.app-pill:hover {
-		border-color: var(--md-sys-color-primary);
-		color: var(--md-sys-color-primary);
-	}
-
-	.app-pill.active {
-		background: var(--md-sys-color-primary-container);
-		border-color: var(--md-sys-color-primary);
-		color: var(--md-sys-color-on-primary-container);
-		font-weight: 600;
 	}
 
 	.featured-dot {
 		width: 6px;
 		height: 6px;
 		border-radius: 50%;
-		background: var(--md-sys-color-tertiary);
+		background: var(--tertiary);
+		display: inline-block;
+		margin-right: 4px;
 	}
 
-	/* Reusable components elements */
 	.block-title {
-		font-family: var(--font-display);
-		font-size: var(--text-title-md);
 		font-weight: 600;
-		color: var(--md-sys-color-on-surface);
-		margin: 0 0 6px;
+		color: var(--on-surface);
 	}
 
 	.block-desc {
 		font-size: var(--text-body-sm);
-		color: var(--md-sys-color-on-surface-variant);
-		margin: 0 0 12px;
+		color: var(--on-surface-variant);
 		line-height: 1.6;
+		margin-top: 4px;
 	}
 
 	.block-buttons {
-		display: flex;
 		gap: var(--space-sm);
-		flex-wrap: wrap;
-		margin-top: var(--space-xs);
+		margin-top: var(--space-sm);
 	}
 
 	.action-btn {
-		display: inline-flex;
-		align-items: center;
-		gap: 8px;
-		padding: 8px 16px;
-		border: 1px solid var(--glass-border);
-		border-radius: var(--radius-full);
-		background: var(--glass-bg);
-		color: var(--md-sys-color-on-surface);
 		font-family: var(--font-body);
 		font-size: var(--text-label-md);
 		font-weight: 500;
-		cursor: pointer;
-		transition: all var(--transition-fast);
-		text-decoration: none;
-	}
-
-	.action-btn:hover {
-		background: color-mix(in srgb, var(--md-sys-color-primary) 12%, transparent);
-		border-color: var(--md-sys-color-primary);
-		color: var(--md-sys-color-primary);
-		transform: translateY(-1px);
-	}
-
-	.action-btn:active {
-		transform: scale(0.97);
-	}
-
-	.action-btn.primary {
-		background: var(--md-sys-color-primary-container);
-		border-color: transparent;
-		color: var(--md-sys-color-on-primary-container);
-		font-weight: 600;
-	}
-
-	.action-btn.primary:hover {
-		filter: brightness(1.1);
-	}
-
-	.action-btn.copied {
-		background: var(--color-success-container);
-		border-color: var(--color-success);
-		color: var(--color-success);
+		height: auto !important;
+		padding: 8px 16px !important;
 	}
 
 	.btn-icon {
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		width: 16px;
-		height: 16px;
+		width: 18px;
+		height: 18px;
 	}
 
 	.btn-icon :global(svg) {
-		width: 16px;
-		height: 16px;
+		width: 18px;
+		height: 18px;
+		fill: currentColor;
 	}
 
 	.icon-wrapper {
@@ -456,11 +353,13 @@
 		width: 18px;
 		height: 18px;
 		color: inherit;
+		fill: currentColor;
 	}
 
 	.icon-wrapper :global(svg) {
 		width: 18px;
 		height: 18px;
+		fill: currentColor;
 	}
 
 	/* ── 1. Timeline Layout ── */
@@ -484,12 +383,8 @@
 	.timeline-bullet {
 		width: 36px;
 		height: 36px;
-		border-radius: 50%;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		color: white;
 		z-index: 2;
+		color: white;
 	}
 
 	.timeline-line {
@@ -510,47 +405,28 @@
 
 	/* ── 2. Minimal Layout ── */
 	.minimal-layout {
-		display: flex;
-		flex-direction: column;
-		gap: var(--space-lg);
+		margin-top: calc(-1 * var(--space-xs));
+	}
+
+	.padding-xs {
+		padding: 4px !important;
 	}
 
 	.minimal-item {
-		background: rgba(255, 255, 255, 0.02);
-		border: 1px solid var(--glass-border);
-		border-radius: var(--radius-md);
-		padding: var(--space-md);
+		background: var(--surface-container-lowest) !important;
+		border-color: var(--glass-border) !important;
 		transition: all var(--transition-normal);
 	}
 
 	.minimal-item:hover {
-		background: rgba(255, 255, 255, 0.04);
-	}
-
-	.minimal-header {
-		display: flex;
-		align-items: center;
-		gap: var(--space-sm);
-		margin-bottom: var(--space-xs);
+		background: color-mix(in srgb, var(--on-surface) 3%, var(--surface-container-lowest)) !important;
 	}
 
 	.minimal-icon {
 		width: 32px;
 		height: 32px;
-		border-radius: 50%;
-		display: flex;
-		align-items: center;
-		justify-content: center;
 		color: white;
 		flex-shrink: 0;
-	}
-
-	.minimal-header .block-title {
-		margin: 0;
-	}
-
-	.minimal-buttons {
-		margin-top: var(--space-sm);
 	}
 
 	/* ── 3. Accordion Layout ── */
@@ -560,70 +436,37 @@
 		gap: var(--space-sm);
 	}
 
-	.accordion-item {
-		background: rgba(255, 255, 255, 0.02);
-		border: 1px solid var(--glass-border);
-		border-radius: var(--radius-md);
-		overflow: hidden;
+	.accordion-details {
+		background: var(--surface-container-lowest) !important;
+		border-color: var(--glass-border) !important;
 		transition: all var(--transition-normal);
+		overflow: hidden;
 	}
 
-	.accordion-item.open {
-		background: rgba(255, 255, 255, 0.04);
-		border-color: var(--md-sys-color-outline-variant);
+	.accordion-details[open] {
+		background: color-mix(in srgb, var(--on-surface) 2%, var(--surface-container-lowest)) !important;
+		border-color: var(--outline-variant) !important;
 	}
 
-	.accordion-header {
-		width: 100%;
-		display: flex;
-		align-items: center;
-		justify-content: space-between;
-		padding: var(--space-md);
-		background: transparent;
-		border: none;
+	.accordion-details summary {
+		padding: var(--space-md) !important;
 		cursor: pointer;
-		text-align: left;
-		color: var(--md-sys-color-on-surface);
+		user-select: none;
+		list-style: none;
 	}
 
-	.accordion-header-left {
-		display: flex;
-		align-items: center;
-		gap: var(--space-sm);
-		min-width: 0;
-		flex: 1;
+	.accordion-details summary::-webkit-details-marker {
+		display: none;
 	}
 
 	.accordion-icon {
 		width: 32px;
 		height: 32px;
-		border-radius: 50%;
-		display: flex;
-		align-items: center;
-		justify-content: center;
 		color: white;
 		flex-shrink: 0;
 	}
 
-	.accordion-header .block-title {
-		margin: 0;
-		overflow: hidden;
-		text-overflow: ellipsis;
-		white-space: nowrap;
-		flex: 1;
-	}
-
-	.chevron {
-		transition: transform var(--transition-normal);
-		color: var(--md-sys-color-on-surface-variant);
-		flex-shrink: 0;
-	}
-
-	.chevron.rotate {
-		transform: rotate(180deg);
-	}
-
-	.accordion-content {
+	.accordion-body-content {
 		padding: 0 var(--space-md) var(--space-md) calc(var(--space-md) + 32px + var(--space-sm));
 	}
 
@@ -635,48 +478,39 @@
 	}
 
 	.card-item {
-		display: flex;
-		gap: var(--space-md);
-		background: rgba(255, 255, 255, 0.03);
-		border: 1px solid var(--glass-border);
-		border-radius: var(--radius-md);
-		padding: var(--space-md);
+		background: var(--surface-container-lowest) !important;
+		border-color: var(--glass-border) !important;
 		transition: all var(--transition-normal);
 	}
 
 	.card-item:hover {
-		background: rgba(255, 255, 255, 0.05);
-		border-color: var(--md-sys-color-outline-variant);
-		transform: translateY(-1px);
+		background: color-mix(in srgb, var(--on-surface) 3%, var(--surface-container-lowest)) !important;
+		border-color: var(--outline-variant) !important;
+		transform: translateY(-2px);
 	}
 
 	.card-icon {
 		width: 36px;
 		height: 36px;
-		border-radius: 50%;
-		display: flex;
-		align-items: center;
-		justify-content: center;
 		color: white;
 		flex-shrink: 0;
 	}
 
-	.card-right {
-		flex: 1;
-		min-width: 0;
+	.card-right-box {
+		padding-left: var(--space-sm);
+	}
+
+	.success-button {
+		background: var(--color-success) !important;
+		color: #1a1a2e !important;
 	}
 
 	@media (max-width: 480px) {
-		.installation-guide {
-			padding: var(--space-md);
+		.installation-guide-card {
+			padding: var(--space-md) !important;
 		}
 
-		.guide-header {
-			flex-direction: column;
-			align-items: flex-start;
-		}
-
-		.accordion-content {
+		.accordion-body-content {
 			padding-left: var(--space-md);
 		}
 	}
