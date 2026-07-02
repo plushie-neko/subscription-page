@@ -1,0 +1,125 @@
+/* ═══════════════════════════════════════════════════════════════
+   M3E Design Tokens — CSS Custom Properties
+   Generated tonal tokens injected at runtime via +layout.svelte
+   This file provides fallback/static tokens + typography + spacing
+   ═══════════════════════════════════════════════════════════════ */
+
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Inter:wght@400;500;600&display=swap');
+
+:root {
+	/* ── Typography ── */
+	--font-display: 'Nunito', 'Segoe UI', system-ui, sans-serif;
+	--font-body: 'Inter', 'Segoe UI', system-ui, sans-serif;
+
+	/* ── Font Sizes (M3 Type Scale) ── */
+	--text-display-lg: 3.5625rem;
+	--text-display-md: 2.8125rem;
+	--text-display-sm: 2.25rem;
+	--text-headline-lg: 2rem;
+	--text-headline-md: 1.75rem;
+	--text-headline-sm: 1.5rem;
+	--text-title-lg: 1.375rem;
+	--text-title-md: 1rem;
+	--text-title-sm: 0.875rem;
+	--text-body-lg: 1rem;
+	--text-body-md: 0.875rem;
+	--text-body-sm: 0.75rem;
+	--text-label-lg: 0.875rem;
+	--text-label-md: 0.75rem;
+	--text-label-sm: 0.6875rem;
+
+	/* ── Spacing ── */
+	--space-xs: 4px;
+	--space-sm: 8px;
+	--space-md: 16px;
+	--space-lg: 24px;
+	--space-xl: 32px;
+	--space-2xl: 48px;
+
+	/* ── Border Radius (M3E = extra rounded) ── */
+	--radius-xs: 8px;
+	--radius-sm: 12px;
+	--radius-md: 16px;
+	--radius-lg: 24px;
+	--radius-xl: 28px;
+	--radius-full: 9999px;
+
+	/* ── Elevation (via box-shadow + surface tint) ── */
+	--elevation-0: none;
+	--elevation-1: 0 1px 3px 0 rgba(0, 0, 0, 0.3), 0 1px 2px -1px rgba(0, 0, 0, 0.3);
+	--elevation-2: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -2px rgba(0, 0, 0, 0.3);
+	--elevation-3: 0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -4px rgba(0, 0, 0, 0.3);
+
+	/* ── Status Colors ── */
+	--color-success: #81C784;
+	--color-success-container: rgba(129, 199, 132, 0.15);
+	--color-warning: #FFB74D;
+	--color-warning-container: rgba(255, 183, 77, 0.15);
+	--color-danger: #E57373;
+	--color-danger-container: rgba(229, 115, 115, 0.15);
+	--color-info: #64B5F6;
+	--color-info-container: rgba(100, 181, 246, 0.15);
+
+	/* ── Glassmorphism ── */
+	--glass-bg: rgba(255, 255, 255, 0.04);
+	--glass-border: rgba(255, 255, 255, 0.08);
+	--glass-blur: 20px;
+
+	/* ── Transition defaults ── */
+	--transition-fast: 150ms cubic-bezier(0.2, 0, 0, 1);
+	--transition-normal: 250ms cubic-bezier(0.2, 0, 0, 1);
+	--transition-slow: 400ms cubic-bezier(0.2, 0, 0, 1);
+	--transition-spring: 500ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* ── Global Reset & Base ── */
+*,
+*::before,
+*::after {
+	box-sizing: border-box;
+	margin: 0;
+	padding: 0;
+}
+
+html {
+	font-family: var(--font-body);
+	color: var(--md-sys-color-on-surface, #e0e0e0);
+	background: var(--md-sys-color-surface, #131318);
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+	scroll-behavior: smooth;
+}
+
+body {
+	min-height: 100vh;
+	line-height: 1.6;
+	overflow-x: hidden;
+}
+
+/* ── Focus styles ── */
+:focus-visible {
+	outline: 2px solid var(--md-sys-color-primary, #B39DDB);
+	outline-offset: 2px;
+	border-radius: var(--radius-xs);
+}
+
+/* ── Scrollbar (cute thin) ── */
+::-webkit-scrollbar {
+	width: 6px;
+}
+::-webkit-scrollbar-track {
+	background: transparent;
+}
+::-webkit-scrollbar-thumb {
+	background: var(--md-sys-color-outline-variant, #444);
+	border-radius: var(--radius-full);
+}
+::-webkit-scrollbar-thumb:hover {
+	background: var(--md-sys-color-outline, #666);
+}
+
+/* ── Selection ── */
+::selection {
+	background: var(--md-sys-color-primary, #B39DDB);
+	color: var(--md-sys-color-on-primary, #1a1a2e);
+}
