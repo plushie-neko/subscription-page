@@ -18,11 +18,44 @@
 
   let selectedPlatformKey = $state<string | null>(null);
   let selectedAppIndex = $state(0);
+  let userPlatform = $state<string | null>(null);
+  let hasAutoSelected = $state(false);
 
-  // Auto-select first platform
+  function detectPlatform(): string | null {
+    if (typeof navigator === 'undefined') return null;
+    const ua = navigator.userAgent.toLowerCase();
+    if (ua.includes('appletv')) return 'appleTV';
+    if (ua.includes('googletv') || ua.includes('androidtv') || (ua.includes('android') && ua.includes('tv'))) return 'androidTV';
+    if (ua.includes('iphone') || ua.includes('ipad') || ua.includes('ipod')) return 'ios';
+    if (ua.includes('android')) return 'android';
+    if (ua.includes('win')) return 'windows';
+    if (ua.includes('macintosh') || ua.includes('mac os x')) return 'macos';
+    if (ua.includes('linux')) return 'linux';
+    return null;
+  }
+
   $effect(() => {
-    if ($availablePlatforms.length > 0 && !selectedPlatformKey) {
-      selectedPlatformKey = $availablePlatforms[0].key;
+    userPlatform = detectPlatform();
+  });
+
+  const sortedPlatforms = $derived.by(() => {
+    const list = [...$availablePlatforms];
+    if (!userPlatform) return list;
+    const matchIdx = list.findIndex(plat => plat.key === userPlatform);
+    if (matchIdx > -1) {
+      const [matched] = list.splice(matchIdx, 1);
+      list.unshift(matched);
+    }
+    return list;
+  });
+
+  // Auto-select first platform based on sorted list
+  $effect(() => {
+    if (sortedPlatforms.length > 0 && !hasAutoSelected) {
+      selectedPlatformKey = sortedPlatforms[0].key;
+      if (typeof navigator !== 'undefined') {
+        hasAutoSelected = true;
+      }
     }
   });
 
@@ -84,7 +117,7 @@
     <div class="pixel-card">
       <!-- Platform tabs -->
       <div class="platform-tabs">
-        {#each $availablePlatforms as plat}
+        {#each sortedPlatforms as plat}
           <button
             class="pixel-tab"
             class:active={selectedPlatformKey === plat.key}
