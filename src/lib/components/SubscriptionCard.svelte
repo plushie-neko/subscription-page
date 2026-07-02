@@ -52,7 +52,7 @@
 <article class="card elevated hero-subscription-card animate-in stagger-1 no-margin">
 	<!-- Hero header with user info & bandwidth progress -->
 	<div class="row align-center card-hero-header">
-		<div class="status-indicator-circle center circle" class:active={isActive} class:inactive={!isActive}>
+		<div class="status-indicator-circle" class:active={isActive} class:inactive={!isActive}>
 			<i>{isActive ? 'check' : 'close'}</i>
 		</div>
 		
@@ -155,6 +155,10 @@
 	.status-indicator-circle {
 		width: 44px;
 		height: 44px;
+		border-radius: 50%;
+		display: flex;
+		align-items: center;
+		justify-content: center;
 		flex-shrink: 0;
 	}
 

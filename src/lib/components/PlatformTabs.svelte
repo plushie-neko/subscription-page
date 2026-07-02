@@ -46,7 +46,6 @@
 	.platform-tabs-bar {
 		border-block-end: 1px solid var(--glass-border) !important;
 		margin-bottom: var(--space-md);
-		justify-content: center !important;
 	}
 
 	.tab-icon-wrapper {

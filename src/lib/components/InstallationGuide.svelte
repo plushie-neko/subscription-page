@@ -108,7 +108,7 @@
 						<div class="timeline-item animate-in" style="animation-delay: {i * 80 + 100}ms">
 							<div class="timeline-bullet-wrapper">
 								<div
-									class="timeline-bullet circle center"
+									class="timeline-bullet circle"
 									style="background: {gradient.background}; border: 1px solid {gradient.border};"
 								>
 									{#if config.svgLibrary[block.svgIconKey]}
@@ -123,7 +123,7 @@
 								<h6 class="block-title font-display">{@html t(block.title)}</h6>
 								<p class="block-desc font-body">{@html t(block.description)}</p>
 								{#if block.buttons.length > 0}
-									<nav class="row block-buttons">
+									<nav class="row wrap block-buttons">
 										{#each block.buttons as button, btnIdx}
 											{@render actionButton(button, `${i}-${btnIdx}`, 'border')}
 										{/each}
@@ -142,7 +142,7 @@
 							<div class="minimal-item animate-in border padding round" style="animation-delay: {i * 80 + 100}ms">
 								<div class="row align-center minimal-header">
 									<div
-										class="minimal-icon circle center"
+										class="minimal-icon circle"
 										style="background: {gradient.background}; border: 1px solid {gradient.border};"
 									>
 										{#if config.svgLibrary[block.svgIconKey]}
@@ -155,7 +155,7 @@
 								<p class="block-desc font-body no-margin">{@html t(block.description)}</p>
 								{#if block.buttons.length > 0}
 									<div class="space"></div>
-									<nav class="row block-buttons no-space">
+									<nav class="row wrap block-buttons no-space">
 										{#each block.buttons as button, btnIdx}
 											{@render actionButton(button, `${i}-${btnIdx}`, 'transparent')}
 										{/each}
@@ -173,7 +173,7 @@
 						<details class="border round accordion-details">
 							<summary class="row align-center">
 								<div
-									class="accordion-icon circle center"
+									class="accordion-icon circle"
 									style="background: {gradient.background}; border: 1px solid {gradient.border};"
 								>
 									{#if config.svgLibrary[block.svgIconKey]}
@@ -186,7 +186,7 @@
 							<div class="accordion-body-content">
 								<p class="block-desc font-body">{@html t(block.description)}</p>
 								{#if block.buttons.length > 0}
-									<nav class="row block-buttons">
+									<nav class="row wrap block-buttons">
 										{#each block.buttons as button, btnIdx}
 											{@render actionButton(button, `${i}-${btnIdx}`, 'border')}
 										{/each}
@@ -204,7 +204,7 @@
 						<article class="card border round padding card-item animate-in" style="animation-delay: {i * 80 + 100}ms">
 							<div class="row align-top">
 								<div
-									class="card-icon circle center"
+									class="card-icon circle"
 									style="background: {gradient.background}; border: 1px solid {gradient.border};"
 								>
 									{#if config.svgLibrary[block.svgIconKey]}
@@ -217,7 +217,7 @@
 									<p class="block-desc font-body no-margin">{@html t(block.description)}</p>
 									{#if block.buttons.length > 0}
 										<div class="space"></div>
-										<nav class="row block-buttons">
+										<nav class="row wrap block-buttons">
 											{#each block.buttons as button, btnIdx}
 												{@render actionButton(button, `${i}-${btnIdx}`, 'border')}
 											{/each}

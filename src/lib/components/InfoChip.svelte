@@ -44,7 +44,7 @@
 	style="--row-bg: {bgMap[color]}; --row-border: {colorMap[color]}; --row-text: {onColorMap[color]}"
 >
 	{#if icon}
-		<div class="row-icon circle center">
+		<div class="row-icon">
 			{@render icon()}
 		</div>
 	{/if}
@@ -69,11 +69,13 @@
 	.row-icon {
 		width: 36px;
 		height: 36px;
+		border-radius: 50%;
 		background: color-mix(in srgb, var(--row-border) 12%, transparent);
 		color: var(--row-border);
 		display: flex;
 		align-items: center;
 		justify-content: center;
+		flex-shrink: 0;
 	}
 
 	.row-label {
