@@ -216,11 +216,23 @@ export async function getSubpageConfigByShortUuid(
 				requestHeaders: reqHeadersRecord
 			});
 		} catch (e: any) {
-			// If POST is not supported or fails, fallback to GET (some setups vary)
-			if (e?.response?.status === 405 || e?.response?.status === 404 || e?.response?.status >= 500 || e?.response?.status === 400) {
-				response = await client.get(`/api/subscriptions/subpage-config/${encodeURIComponent(shortUuid)}`);
-			} else {
-				throw e;
+			console.warn(`POST /api/subscriptions/subpage-config/${shortUuid} failed with status: ${e?.response?.status}. Falling back to GET with body.`);
+			
+			try {
+				// If POST is not supported or fails, fallback to GET (some setups vary)
+				response = await client.request({
+					method: 'GET',
+					url: `/api/subscriptions/subpage-config/${encodeURIComponent(shortUuid)}`,
+					data: {
+						requestHeaders: reqHeadersRecord
+					},
+					headers: {
+						'Content-Type': 'application/json'
+					}
+				});
+			} catch (fallbackError: any) {
+				console.error('GET fallback failed as well. Error:', fallbackError?.response?.data || fallbackError?.message || fallbackError);
+				throw fallbackError; // throw to be caught by outer block
 			}
 		}
 
