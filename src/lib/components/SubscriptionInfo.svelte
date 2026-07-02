@@ -1,53 +1,79 @@
 <script lang="ts">
-  import { subscription, config, currentLang } from '$lib/stores/subscription';
-  import { formatDate, getExpirationText, bandwidthProgress } from '$lib/utils/format';
-  import { createTranslator } from '$lib/utils/i18n';
+  import { subscription, config, currentLang } from "$lib/stores/subscription";
+  import {
+    formatDate,
+    getExpirationText,
+    bandwidthProgress,
+  } from "$lib/utils/format";
+  import { createTranslator } from "$lib/utils/i18n";
 
   const t = $derived(createTranslator($currentLang, $config?.baseTranslations));
 
   const user = $derived($subscription?.user);
 
-  const isActive = $derived(user?.userStatus === 'ACTIVE');
+  const isActive = $derived(user?.userStatus === "ACTIVE");
   const statusText = $derived(
     $config?.baseTranslations
-      ? (isActive ? t($config.baseTranslations.active) : t($config.baseTranslations.inactive))
-      : (isActive ? 'Active' : 'Inactive')
+      ? isActive
+        ? t($config.baseTranslations.active)
+        : t($config.baseTranslations.inactive)
+      : isActive
+        ? "Active"
+        : "Inactive",
   );
 
   const expiryText = $derived(
-    user && $config?.baseTranslations ? getExpirationText(user.expiresAt, $currentLang, $config.baseTranslations) : ''
+    user && $config?.baseTranslations
+      ? getExpirationText(
+          user.expiresAt,
+          $currentLang,
+          $config.baseTranslations,
+        )
+      : "",
   );
   const expiryDate = $derived(
-    user && $config?.baseTranslations ? formatDate(user.expiresAt, $currentLang, $config.baseTranslations) : ''
+    user && $config?.baseTranslations
+      ? formatDate(user.expiresAt, $currentLang, $config.baseTranslations)
+      : "",
   );
 
   // Bandwidth progress and display
   const isUnlimited = $derived(
-    !user?.trafficLimit || user?.trafficLimit === '0' || user?.trafficLimit === '0.00 B'
+    !user?.trafficLimit ||
+      user?.trafficLimit === "0" ||
+      user?.trafficLimit === "0.00 B",
   );
 
   const bandwidthPercent = $derived(
-    user ? Math.min(100, Math.max(2, bandwidthProgress(user.trafficUsed, user.trafficLimit) * 100)) : 0
+    user
+      ? Math.min(
+          100,
+          Math.max(
+            2,
+            bandwidthProgress(user.trafficUsed, user.trafficLimit) * 100,
+          ),
+        )
+      : 0,
   );
 
   const barClass = $derived(
-    bandwidthPercent > 90 ? 'danger' :
-    bandwidthPercent > 70 ? 'warning' :
-    'mp'
+    bandwidthPercent > 90 ? "danger" : bandwidthPercent > 70 ? "warning" : "mp",
   );
 
   // Get layout config from backend settings
-  const blockType = $derived($config?.uiConfig?.subscriptionInfoBlockType ?? 'expanded');
+  const blockType = $derived(
+    $config?.uiConfig?.subscriptionInfoBlockType ?? "expanded",
+  );
 
   // Status icon configuration for header blocks
   const statusConfig = $derived.by(() => {
-    if (user?.userStatus === 'ACTIVE' && user.daysLeft > 3) {
-      return { color: 'green', icon: 'pixelarticons:check' };
+    if (user?.userStatus === "ACTIVE" && user.daysLeft > 3) {
+      return { color: "green", icon: "pixelarticons:check" };
     }
-    if (user?.userStatus === 'ACTIVE' && user.daysLeft > 0) {
-      return { color: 'yellow', icon: 'pixelarticons:alert' };
+    if (user?.userStatus === "ACTIVE" && user.daysLeft > 0) {
+      return { color: "yellow", icon: "pixelarticons:alert" };
     }
-    return { color: 'red', icon: 'pixelarticons:close' };
+    return { color: "red", icon: "pixelarticons:close" };
   });
 
   // Collapsed block toggle state
@@ -58,9 +84,13 @@
   <div class="stats-grid">
     <!-- Username -->
     <div class="stat-card mint">
-      <div class="stat-icon"><iconify-icon icon="pixelarticons:user"></iconify-icon></div>
+      <div class="stat-icon">
+        <iconify-icon icon="pixelarticons:user"></iconify-icon>
+      </div>
       <div class="stat-text">
-        <div class="stat-label">{#if $config?.baseTranslations}{t('name')}{:else}Name{/if}</div>
+        <div class="stat-label">
+          {#if $config?.baseTranslations}{t("name")}{:else}Name{/if}
+        </div>
         <div class="stat-value">{user.username || user.shortUuid}</div>
       </div>
     </div>
@@ -68,10 +98,14 @@
     <!-- Status -->
     <div class="stat-card" class:green={isActive} class:red={!isActive}>
       <div class="stat-icon">
-        <iconify-icon icon={isActive ? 'pixelarticons:heart' : 'pixelarticons:heart-broken'}></iconify-icon>
+        <iconify-icon
+          icon={isActive ? "pixelarticons:heart" : "pixelarticons:heart-broken"}
+        ></iconify-icon>
       </div>
       <div class="stat-text">
-        <div class="stat-label">{#if $config?.baseTranslations}{t('status')}{:else}Status{/if}</div>
+        <div class="stat-label">
+          {#if $config?.baseTranslations}{t("status")}{:else}Status{/if}
+        </div>
         <div class="stat-value" class:active-glow={isActive}>
           {statusText}
         </div>
@@ -85,9 +119,13 @@
 
     <!-- Expires -->
     <div class="stat-card peach">
-      <div class="stat-icon"><iconify-icon icon="pixelarticons:calendar"></iconify-icon></div>
+      <div class="stat-icon">
+        <iconify-icon icon="pixelarticons:calendar"></iconify-icon>
+      </div>
       <div class="stat-text">
-        <div class="stat-label">{#if $config?.baseTranslations}{t('expires')}{:else}Expires{/if}</div>
+        <div class="stat-label">
+          {#if $config?.baseTranslations}{t("expires")}{:else}Expires{/if}
+        </div>
         <div class="stat-value">{expiryDate}</div>
         {#if expiryDate !== expiryText}
           <div class="stat-sub">{expiryText}</div>
@@ -97,32 +135,38 @@
 
     <!-- Bandwidth -->
     <div class="stat-card cyan bandwidth-card">
-      <div class="stat-icon"><iconify-icon icon="pixelarticons:chart-bar"></iconify-icon></div>
+      <div class="stat-icon">
+        <iconify-icon icon="pixelarticons:chart-bar"></iconify-icon>
+      </div>
       <div class="stat-text">
-        <div class="stat-label">{#if $config?.baseTranslations}{t('bandwidth')}{:else}Bandwidth{/if}</div>
+        <div class="stat-label">
+          {#if $config?.baseTranslations}{t("bandwidth")}{:else}Bandwidth{/if}
+        </div>
         <div class="stat-value bandwidth-val">
           {#if user}
-            {user.trafficUsed || '0 B'} / 
+            {user.trafficUsed || "0 B"} /
             {#if isUnlimited}
-              <svg class="infinity-icon" viewBox="0 0 13 6" fill="currentColor" aria-label="infinity">
-                <rect x="1" y="0" width="4" height="1" />
-                <rect x="8" y="0" width="4" height="1" />
-                <rect x="0" y="1" width="2" height="1" />
-                <rect x="4" y="1" width="2" height="1" />
-                <rect x="7" y="1" width="2" height="1" />
-                <rect x="11" y="1" width="2" height="1" />
-                <rect x="0" y="2" width="2" height="1" />
-                <rect x="5" y="2" width="3" height="1" />
-                <rect x="11" y="2" width="2" height="1" />
-                <rect x="0" y="3" width="2" height="1" />
-                <rect x="5" y="3" width="3" height="1" />
-                <rect x="11" y="3" width="2" height="1" />
-                <rect x="0" y="4" width="2" height="1" />
-                <rect x="4" y="4" width="2" height="1" />
-                <rect x="7" y="4" width="2" height="1" />
-                <rect x="11" y="4" width="2" height="1" />
-                <rect x="1" y="5" width="4" height="1" />
-                <rect x="8" y="5" width="4" height="1" />
+              <svg
+                class="infinity-icon"
+                viewBox="0 0 18 10"
+                fill="currentColor"
+                aria-label="infinity"
+              >
+                <rect x="2" y="0" width="4" height="2" />
+                <rect x="12" y="0" width="4" height="2" />
+                <rect x="0" y="2" width="2" height="2" />
+                <rect x="6" y="2" width="2" height="2" />
+                <rect x="10" y="2" width="2" height="2" />
+                <rect x="16" y="2" width="2" height="2" />
+                <rect x="0" y="4" width="2" height="2" />
+                <rect x="8" y="4" width="2" height="2" />
+                <rect x="16" y="4" width="2" height="2" />
+                <rect x="0" y="6" width="2" height="2" />
+                <rect x="6" y="6" width="2" height="2" />
+                <rect x="10" y="6" width="2" height="2" />
+                <rect x="16" y="6" width="2" height="2" />
+                <rect x="2" y="8" width="4" height="2" />
+                <rect x="12" y="8" width="4" height="2" />
               </svg>
             {:else}
               {user.trafficLimit}
@@ -142,36 +186,58 @@
   </div>
 {/snippet}
 
-{#if user && blockType !== 'hidden'}
-  <section class="sub-info" style="animation: slide-up 0.3s ease both; animation-delay: 0.1s;">
-    <h2 class="section-title">{#if $config?.baseTranslations}{t('playerStats')}{:else}Player Stats{/if}</h2>
+{#if user && blockType !== "hidden"}
+  <section
+    class="sub-info"
+    style="animation: slide-up 0.3s ease both; animation-delay: 0.1s;"
+  >
+    <h2 class="section-title">
+      {#if $config?.baseTranslations}{t("playerStats")}{:else}Player Stats{/if}
+    </h2>
 
-    {#if blockType === 'cards'}
+    {#if blockType === "cards"}
       {@render statsGrid(user)}
-    {:else if blockType === 'collapsed'}
+    {:else if blockType === "collapsed"}
       <div class="pixel-card sub-info-card">
-        <button class="card-header-btn" onclick={() => isExpanded = !isExpanded} aria-expanded={isExpanded}>
+        <button
+          class="card-header-btn"
+          onclick={() => (isExpanded = !isExpanded)}
+          aria-expanded={isExpanded}
+        >
           <div class="header-left">
             <div class="status-icon-circle {statusConfig.color}">
               <iconify-icon icon={statusConfig.icon}></iconify-icon>
             </div>
             <div class="header-text">
               <div class="header-name">{user.username || user.shortUuid}</div>
-              <div class="header-desc" class:expiry-warning={statusConfig.color === 'yellow'} class:expiry-danger={statusConfig.color === 'red'}>{expiryText}</div>
+              <div
+                class="header-desc"
+                class:expiry-warning={statusConfig.color === "yellow"}
+                class:expiry-danger={statusConfig.color === "red"}
+              >
+                {expiryText}
+              </div>
             </div>
           </div>
           <div class="header-right">
-            <iconify-icon icon="pixelarticons:chevron-down" class="chevron" class:expanded={isExpanded}></iconify-icon>
+            <iconify-icon
+              icon="pixelarticons:chevron-down"
+              class="chevron"
+              class:expanded={isExpanded}
+            ></iconify-icon>
           </div>
         </button>
 
         {#if isExpanded}
-          <div class="collapse-content" style="animation: slide-up 0.2s ease both;">
+          <div
+            class="collapse-content"
+            style="animation: slide-up 0.2s ease both;"
+          >
             {@render statsGrid(user)}
           </div>
         {/if}
       </div>
-    {:else if blockType === 'expanded'}
+    {:else if blockType === "expanded"}
       <div class="pixel-card sub-info-card">
         <div class="card-header-static">
           <div class="header-left">
@@ -180,7 +246,13 @@
             </div>
             <div class="header-text">
               <div class="header-name">{user.username || user.shortUuid}</div>
-              <div class="header-desc" class:expiry-warning={statusConfig.color === 'yellow'} class:expiry-danger={statusConfig.color === 'red'}>{expiryText}</div>
+              <div
+                class="header-desc"
+                class:expiry-warning={statusConfig.color === "yellow"}
+                class:expiry-danger={statusConfig.color === "red"}
+              >
+                {expiryText}
+              </div>
             </div>
           </div>
         </div>
@@ -390,6 +462,4 @@
     margin-top: 6px;
     width: 100%;
   }
-
-
 </style>
