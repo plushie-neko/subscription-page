@@ -3,6 +3,7 @@ import { MOCK_SUBSCRIPTION, MOCK_CONFIG } from '$lib/server/mock-data';
 import { getAppConfig } from '$lib/server/config';
 import { getSubscriptionInfo, getSubpageConfigByShortUuid } from '$lib/server/api';
 import { signSessionToken } from '$lib/server/jwt';
+import { resolveClientIp } from '$lib/server/ip';
 
 export const load: PageServerLoad = async ({ params, request, cookies, getClientAddress }) => {
 	const { shortUuid } = params;
@@ -26,13 +27,7 @@ export const load: PageServerLoad = async ({ params, request, cookies, getClient
 
 	try {
 		// Resolve Client IP from SvelteKit event
-		let clientIp = '127.0.0.1';
-		try {
-			clientIp = getClientAddress();
-		} catch {
-			// Fallback if getClientAddress is not available/fails
-			clientIp = request.headers.get('x-forwarded-for') || '127.0.0.1';
-		}
+		const clientIp = resolveClientIp({ getClientAddress, request });
 
 		// 1. Resolve subpage config by shortUuid
 		const requestHeaders = new Headers(request.headers);

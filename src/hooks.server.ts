@@ -1,5 +1,6 @@
 import type { Handle } from '@sveltejs/kit';
 import { getSubscription } from '$lib/server/api';
+import { resolveClientIp } from '$lib/server/ip';
 
 const browserKeywords = [
 	'Mozilla',
@@ -36,12 +37,7 @@ export const handle: Handle = async ({ event, resolve }) => {
 
 			// If NOT a browser, proxy the raw subscription content
 			if (!isBrowser) {
-				let clientIp = '127.0.0.1';
-				try {
-					clientIp = event.getClientAddress();
-				} catch {
-					clientIp = event.request.headers.get('x-forwarded-for') || '127.0.0.1';
-				}
+				const clientIp = resolveClientIp(event);
 
 				try {
 					const requestHeaders = new Headers(event.request.headers);

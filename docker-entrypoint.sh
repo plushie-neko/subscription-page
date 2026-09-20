@@ -16,5 +16,16 @@ else
 	echo "INTERNAL_JWT_SECRET is already defined in the environment."
 fi
 
+# Default ADDRESS_HEADER to X-Forwarded-For if not set, enabling real client IP resolution in @sveltejs/adapter-node
+if [ -z "$ADDRESS_HEADER" ]; then
+	echo "ADDRESS_HEADER not defined. Defaulting to X-Forwarded-For..."
+	export ADDRESS_HEADER="X-Forwarded-For"
+fi
+
+if [ -z "$XFF_DEPTH" ]; then
+	echo "XFF_DEPTH not defined. Defaulting to 1..."
+	export XFF_DEPTH="1"
+fi
+
 echo "Entrypoint script completed. Starting SvelteKit server..."
 exec "$@"

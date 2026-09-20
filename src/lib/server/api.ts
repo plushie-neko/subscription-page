@@ -127,6 +127,7 @@ function getAxiosClient(clientIp?: string, customHeaders?: Headers) {
 	if (clientIp) {
 		headers['X-Real-IP'] = clientIp;
 		headers['X-Forwarded-For'] = clientIp;
+		headers['x-remnawave-real-ip'] = clientIp;
 	}
 
 	return axios.create({

@@ -28,6 +28,8 @@ COPY --from=build /opt/app/docker-entrypoint.sh ./
 
 ENV PORT=3010
 ENV NODE_ENV=production
+ENV ADDRESS_HEADER=X-Forwarded-For
+ENV XFF_DEPTH=1
 
 ENTRYPOINT [ "/bin/sh", "docker-entrypoint.sh" ]
 CMD [ "node", "build/index.js" ]
