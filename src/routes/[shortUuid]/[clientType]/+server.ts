@@ -1,16 +1,12 @@
 import type { RequestHandler } from './$types';
 import { getSubscription } from '$lib/server/api';
+import { resolveClientIp } from '$lib/server/ip';
 
 export const GET: RequestHandler = async ({ params, request, getClientAddress }) => {
 	const { shortUuid, clientType } = params;
 
 	// Resolve client IP
-	let clientIp = '127.0.0.1';
-	try {
-		clientIp = getClientAddress();
-	} catch {
-		clientIp = request.headers.get('x-forwarded-for') || '127.0.0.1';
-	}
+	const clientIp = resolveClientIp({ getClientAddress, request });
 
 	try {
 		const requestHeaders = new Headers(request.headers);
